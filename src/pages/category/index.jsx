@@ -109,8 +109,13 @@ const Category = () => {
       const categoryProducts = mockProducts[slug] || [];
       setProducts(categoryProducts);
       setFilteredProducts(categoryProducts);
-        setLoading(false);
+      setLoading(false);
     }, 500);
+  }, [slug]);
+
+  useEffect(() => {
+    // Scroll to top when component mounts or slug changes
+    window.scrollTo(0, 0);
   }, [slug]);
 
   useEffect(() => {

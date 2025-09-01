@@ -34,6 +34,9 @@ const ProductDescription = () => {
   const [upvotes, setUpvotes] = useState({});
 
   useEffect(() => {
+    // Scroll to top when component mounts or id changes
+    window.scrollTo(0, 0);
+    
     const fetchProduct = async () => {
       try {
         setLoading(true);
