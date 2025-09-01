@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 const ConsumerLogin = () => {
   const [formData, setFormData] = useState({
@@ -8,6 +9,8 @@ const ConsumerLogin = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -42,8 +45,24 @@ const ConsumerLogin = () => {
       // Simulate API call for login
       setTimeout(() => {
         setIsLoading(false);
-        // Redirect to dashboard or show success message
-        alert('Login successful! Redirecting to dashboard...');
+        
+        // Mock user data - store in localStorage
+        const userData = {
+          name: formData.email.split('@')[0],
+          email: formData.email,
+          id: 'user_' + Date.now()
+        };
+        localStorage.setItem('currentUser', JSON.stringify(userData));
+        
+        // Get return URL from search params
+        const returnUrl = searchParams.get('returnUrl');
+        
+        // Redirect to return URL or default to dashboard
+        if (returnUrl) {
+          navigate(returnUrl);
+        } else {
+          navigate('/customer/dashboard');
+        }
       }, 2000);
     }
   };
@@ -142,7 +161,10 @@ const ConsumerLogin = () => {
           <div className="text-center">
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
-              <Link to="/auth/consumer-signup" className="font-medium text-blue-600 hover:text-blue-500">
+              <Link 
+                to={`/auth/consumer-signup${searchParams.get('returnUrl') ? `?returnUrl=${searchParams.get('returnUrl')}` : ''}`} 
+                className="font-medium text-blue-600 hover:text-blue-500"
+              >
                 Sign up here
               </Link>
             </p>

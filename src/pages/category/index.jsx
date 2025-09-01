@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import ProductCard from '../../components/productcard';
+import Navbar from '../../components/navbar';
 
 const Category = () => {
   const { slug } = useParams();
@@ -14,86 +15,86 @@ const Category = () => {
   // Mock products data for consumer empowerment platform - this will be replaced by backend data later
   const mockProducts = {
     'food-beverages': [
-      { name: 'Organic Apples - Brand A', price: 120, rating: 4.5, image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&h=400&fit=crop', badge: 'FSSAI Certified', discount: 10, safetyScore: 95 },
-      { name: 'Fresh Tomatoes - Brand B', price: 40, rating: 4.2, image: 'https://images.unsplash.com/photo-1546094096-0df4bcaaa337?w=400&h=400&fit=crop', badge: 'Pesticide Free', safetyScore: 88 },
-      { name: 'Organic Spinach - Brand C', price: 60, rating: 4.7, image: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400&h=400&fit=crop', badge: 'Organic Certified', safetyScore: 92 },
-      { name: 'Fresh Carrots - Brand D', price: 35, rating: 4.1, image: 'https://images.unsplash.com/photo-1447175008436-170170724a28?w=400&h=400&fit=crop', badge: 'Quality Tested', safetyScore: 85 },
-      { name: 'Organic Bananas - Brand E', price: 80, rating: 4.4, image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400&h=400&fit=crop', badge: 'Organic Certified', discount: 15, safetyScore: 90 },
-      { name: 'Fresh Onions - Brand F', price: 25, rating: 4.0, image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=400&h=400&fit=crop', badge: 'Quality Assured', safetyScore: 82 },
+      { _id: 'organic-apples-brand-a', name: 'Organic Apples - Brand A', price: 120, rating: 4.5, image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&h=400&fit=crop', badge: 'FSSAI Certified', discount: 10, safetyScore: 95 },
+      { _id: 'fresh-tomatoes-brand-b', name: 'Fresh Tomatoes - Brand B', price: 40, rating: 4.2, image: 'https://images.unsplash.com/photo-1546094096-0df4bcaaa337?w=400&h=400&fit=crop', badge: 'Pesticide Free', safetyScore: 88 },
+      { _id: 'organic-spinach-brand-c', name: 'Organic Spinach - Brand C', price: 60, rating: 4.7, image: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400&h=400&fit=crop', badge: 'Organic Certified', safetyScore: 92 },
+      { _id: 'fresh-carrots-brand-d', name: 'Fresh Carrots - Brand D', price: 35, rating: 4.1, image: 'https://images.unsplash.com/photo-1447175008436-170170724a28?w=400&h=400&fit=crop', badge: 'Quality Tested', safetyScore: 85 },
+      { _id: 'organic-bananas-brand-e', name: 'Organic Bananas - Brand E', price: 80, rating: 4.4, image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400&h=400&fit=crop', badge: 'Organic Certified', discount: 15, safetyScore: 90 },
+      { _id: 'fresh-onions-brand-f', name: 'Fresh Onions - Brand F', price: 25, rating: 4.0, image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=400&h=400&fit=crop', badge: 'Quality Assured', safetyScore: 82 },
     ],
     'health-wellness': [
-      { name: 'Vitamin C Supplements - Brand A', price: 450, rating: 4.6, image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&h=400&fit=crop', badge: 'FSSAI Approved', safetyScore: 94 },
-      { name: 'Protein Powder - Brand B', price: 1200, rating: 4.3, image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=400&fit=crop', badge: 'Lab Tested', safetyScore: 89 },
-      { name: 'Omega-3 Capsules - Brand C', price: 850, rating: 4.8, image: 'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=400&h=400&fit=crop', badge: 'USP Verified', safetyScore: 96 },
-      { name: 'Probiotics - Brand D', price: 650, rating: 4.5, image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=400&fit=crop', badge: 'Clinical Proven', safetyScore: 91 },
-      { name: 'Multivitamin - Brand E', price: 750, rating: 4.2, image: 'https://images.unsplash.com/photo-1548907040-4baa9d7e7f8b?w=400&h=400&fit=crop', badge: 'GMP Certified', safetyScore: 87 },
-      { name: 'Iron Supplements - Brand F', price: 550, rating: 4.4, image: 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400&h=400&fit=crop', badge: 'Doctor Recommended', safetyScore: 93 },
+      { _id: 'vitamin-c-supplements-brand-a', name: 'Vitamin C Supplements - Brand A', price: 450, rating: 4.6, image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&h=400&fit=crop', badge: 'FSSAI Approved', safetyScore: 94 },
+      { _id: 'protein-powder-brand-b', name: 'Protein Powder - Brand B', price: 1200, rating: 4.3, image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=400&fit=crop', badge: 'Lab Tested', safetyScore: 89 },
+      { _id: 'omega-3-capsules-brand-c', name: 'Omega-3 Capsules - Brand C', price: 850, rating: 4.8, image: 'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=400&h=400&fit=crop', badge: 'USP Verified', safetyScore: 96 },
+      { _id: 'probiotics-brand-d', name: 'Probiotics - Brand D', price: 650, rating: 4.5, image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=400&fit=crop', badge: 'Clinical Proven', safetyScore: 91 },
+      { _id: 'multivitamin-brand-e', name: 'Multivitamin - Brand E', price: 750, rating: 4.2, image: 'https://images.unsplash.com/photo-1548907040-4baa9d7e7f8b?w=400&h=400&fit=crop', badge: 'GMP Certified', safetyScore: 87 },
+      { _id: 'iron-supplements-brand-f', name: 'Iron Supplements - Brand F', price: 550, rating: 4.4, image: 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400&h=400&fit=crop', badge: 'Doctor Recommended', safetyScore: 93 },
     ],
     'electronics-tech': [
-      { name: 'Smartphone - Brand A', price: 25000, rating: 4.6, image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop', badge: 'BIS Certified', safetyScore: 92 },
-      { name: 'Laptop - Brand B', price: 45000, rating: 4.7, image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop', badge: 'Energy Star', safetyScore: 94 },
-      { name: 'Wireless Earbuds - Brand C', price: 3500, rating: 4.3, image: 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400&h=400&fit=crop', badge: 'Bluetooth Certified', safetyScore: 88 },
-      { name: 'Power Bank - Brand D', price: 1200, rating: 4.4, image: 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400&h=400&fit=crop', badge: 'CE Marked', safetyScore: 85 },
-      { name: 'Smart Watch - Brand E', price: 8500, rating: 4.5, image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop', badge: 'Water Resistant', safetyScore: 90 },
-      { name: 'Tablet - Brand F', price: 18000, rating: 4.2, image: 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400&h=400&fit=crop', badge: 'BIS Certified', discount: 20, safetyScore: 87 },
+      { _id: 'smartphone-brand-a', name: 'Smartphone - Brand A', price: 25000, rating: 4.6, image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop', badge: 'BIS Certified', safetyScore: 92 },
+      { _id: 'laptop-brand-b', name: 'Laptop - Brand B', price: 45000, rating: 4.7, image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop', badge: 'Energy Star', safetyScore: 94 },
+      { _id: 'wireless-earbuds-brand-c', name: 'Wireless Earbuds - Brand C', price: 3500, rating: 4.3, image: 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400&h=400&fit=crop', badge: 'Bluetooth Certified', safetyScore: 88 },
+      { _id: 'power-bank-brand-d', name: 'Power Bank - Brand D', price: 1200, rating: 4.4, image: 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400&h=400&fit=crop', badge: 'CE Marked', safetyScore: 85 },
+      { _id: 'smart-watch-brand-e', name: 'Smart Watch - Brand E', price: 8500, rating: 4.5, image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop', badge: 'Water Resistant', safetyScore: 90 },
+      { _id: 'tablet-brand-f', name: 'Tablet - Brand F', price: 18000, rating: 4.2, image: 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400&h=400&fit=crop', badge: 'BIS Certified', discount: 20, safetyScore: 87 },
     ],
     'home-lifestyle': [
-      { name: 'Air Purifier - Brand A', price: 8500, rating: 4.6, image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=400&fit=crop', badge: 'HEPA Filter', safetyScore: 93 },
-      { name: 'Water Filter - Brand B', price: 3200, rating: 4.8, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72719488?w=400&h=400&fit=crop', badge: 'NSF Certified', safetyScore: 96 },
-      { name: 'Kitchen Appliances Set - Brand C', price: 12500, rating: 4.5, image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=400&fit=crop', badge: 'ISI Marked', safetyScore: 89 },
-      { name: 'Bedding Set - Brand D', price: 4500, rating: 4.4, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72719488?w=400&h=400&fit=crop', badge: 'OEKO-TEX Certified', safetyScore: 91 },
-      { name: 'Furniture - Brand E', price: 18000, rating: 4.3, image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=400&fit=crop', badge: 'FSC Certified', safetyScore: 87 },
-      { name: 'Lighting Solutions - Brand F', price: 2800, rating: 4.7, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72719488?w=400&h=400&fit=crop', badge: 'Energy Efficient', discount: 15, safetyScore: 94 },
+      { _id: 'air-purifier-brand-a', name: 'Air Purifier - Brand A', price: 8500, rating: 4.6, image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=400&fit=crop', badge: 'HEPA Filter', safetyScore: 93 },
+      { _id: 'water-filter-brand-b', name: 'Water Filter - Brand B', price: 3200, rating: 4.8, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72719488?w=400&h=400&fit=crop', badge: 'NSF Certified', safetyScore: 96 },
+      { _id: 'kitchen-appliances-set-brand-c', name: 'Kitchen Appliances Set - Brand C', price: 12500, rating: 4.5, image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=400&fit=crop', badge: 'ISI Marked', safetyScore: 89 },
+      { _id: 'bedding-set-brand-d', name: 'Bedding Set - Brand D', price: 4500, rating: 4.4, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72719488?w=400&h=400&fit=crop', badge: 'OEKO-TEX Certified', safetyScore: 91 },
+      { _id: 'furniture-brand-e', name: 'Furniture - Brand E', price: 18000, rating: 4.3, image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=400&fit=crop', badge: 'FSC Certified', safetyScore: 87 },
+      { _id: 'lighting-solutions-brand-f', name: 'Lighting Solutions - Brand F', price: 2800, rating: 4.7, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72719488?w=400&h=400&fit=crop', badge: 'Energy Efficient', discount: 15, safetyScore: 94 },
     ],
     'beauty-personal-care': [
-      { name: 'Face Cream - Brand A', price: 850, rating: 4.6, image: 'https://images.unsplash.com/photo-1485925832434-374f4b0e0b04?w=400&h=400&fit=crop', badge: 'Dermatologist Tested', safetyScore: 92 },
-      { name: 'Shampoo - Brand B', price: 450, rating: 4.4, image: 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400&h=400&fit=crop', badge: 'Sulfate Free', safetyScore: 88 },
-      { name: 'Sunscreen - Brand C', price: 650, rating: 4.7, image: 'https://images.unsplash.com/photo-1485925832434-374f4b0e0b04?w=400&h=400&fit=crop', badge: 'SPF 50+', safetyScore: 95 },
-      { name: 'Toothpaste - Brand D', price: 180, rating: 4.3, image: 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400&h=400&fit=crop', badge: 'ADA Approved', safetyScore: 90 },
-      { name: 'Lipstick - Brand E', price: 750, rating: 4.5, image: 'https://images.unsplash.com/photo-1485925832434-374f4b0e0b04?w=400&h=400&fit=crop', badge: 'Lead Free', safetyScore: 93 },
-      { name: 'Perfume - Brand F', price: 1200, rating: 4.2, image: 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400&h=400&fit=crop', badge: 'Phthalate Free', discount: 10, safetyScore: 87 },
+      { _id: 'face-cream-brand-a', name: 'Face Cream - Brand A', price: 850, rating: 4.6, image: 'https://images.unsplash.com/photo-1485925832434-374f4b0e0b04?w=400&h=400&fit=crop', badge: 'Dermatologist Tested', safetyScore: 92 },
+      { _id: 'shampoo-brand-b', name: 'Shampoo - Brand B', price: 450, rating: 4.4, image: 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400&h=400&fit=crop', badge: 'Sulfate Free', safetyScore: 88 },
+      { _id: 'sunscreen-brand-c', name: 'Sunscreen - Brand C', price: 650, rating: 4.7, image: 'https://images.unsplash.com/photo-1485925832434-374f4b0e0b04?w=400&h=400&fit=crop', badge: 'SPF 50+', safetyScore: 95 },
+      { _id: 'toothpaste-brand-d', name: 'Toothpaste - Brand D', price: 180, rating: 4.3, image: 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400&h=400&fit=crop', badge: 'ADA Approved', safetyScore: 90 },
+      { _id: 'lipstick-brand-e', name: 'Lipstick - Brand E', price: 750, rating: 4.5, image: 'https://images.unsplash.com/photo-1485925832434-374f4b0e0b04?w=400&h=400&fit=crop', badge: 'Lead Free', safetyScore: 93 },
+      { _id: 'perfume-brand-f', name: 'Perfume - Brand F', price: 1200, rating: 4.2, image: 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400&h=400&fit=crop', badge: 'Phthalate Free', discount: 10, safetyScore: 87 },
     ],
     'automotive-transport': [
-      { name: 'Car Air Freshener - Brand A', price: 280, rating: 4.6, image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=400&fit=crop', badge: 'Non-Toxic', safetyScore: 89 },
-      { name: 'Car Seat Cover - Brand B', price: 1200, rating: 4.8, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72719488?w=400&h=400&fit=crop', badge: 'Fire Retardant', safetyScore: 94 },
-      { name: 'Motor Oil - Brand C', price: 450, rating: 4.5, image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=400&fit=crop', badge: 'API Certified', safetyScore: 91 },
-      { name: 'Tire - Brand D', price: 3200, rating: 4.4, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72719488?w=400&h=400&fit=crop', badge: 'DOT Approved', safetyScore: 93 },
-      { name: 'Brake Pads - Brand E', price: 850, rating: 4.3, image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=400&fit=crop', badge: 'OE Quality', safetyScore: 87 },
-      { name: 'Car Battery - Brand F', price: 5800, rating: 4.7, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72719488?w=400&h=400&fit=crop', badge: 'BIS Certified', discount: 15, safetyScore: 96 },
+      { _id: 'car-air-freshener-brand-a', name: 'Car Air Freshener - Brand A', price: 280, rating: 4.6, image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=400&fit=crop', badge: 'Non-Toxic', safetyScore: 89 },
+      { _id: 'car-seat-cover-brand-b', name: 'Car Seat Cover - Brand B', price: 1200, rating: 4.8, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72719488?w=400&h=400&fit=crop', badge: 'Fire Retardant', safetyScore: 94 },
+      { _id: 'motor-oil-brand-c', name: 'Motor Oil - Brand C', price: 450, rating: 4.5, image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=400&fit=crop', badge: 'API Certified', safetyScore: 91 },
+      { _id: 'tire-brand-d', name: 'Tire - Brand D', price: 3200, rating: 4.4, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72719488?w=400&h=400&fit=crop', badge: 'DOT Approved', safetyScore: 93 },
+      { _id: 'brake-pads-brand-e', name: 'Brake Pads - Brand E', price: 850, rating: 4.3, image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=400&fit=crop', badge: 'OE Quality', safetyScore: 87 },
+      { _id: 'car-battery-brand-f', name: 'Car Battery - Brand F', price: 5800, rating: 4.7, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72719488?w=400&h=400&fit=crop', badge: 'BIS Certified', discount: 15, safetyScore: 96 },
     ],
     'financial-services': [
-      { name: 'Health Insurance - Brand A', price: 8500, rating: 4.6, image: 'https://images.unsplash.com/photo-1485925832434-374f4b0e0b04?w=400&h=400&fit=crop', badge: 'IRDAI Approved', safetyScore: 94 },
-      { name: 'Investment Plan - Brand B', price: 12000, rating: 4.4, image: 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400&h=400&fit=crop', badge: 'SEBI Registered', safetyScore: 91 },
-      { name: 'Credit Card - Brand C', price: 2500, rating: 4.7, image: 'https://images.unsplash.com/photo-1485925832434-374f4b0e0b04?w=400&h=400&fit=crop', badge: 'RBI Compliant', safetyScore: 95 },
-      { name: 'Loan Service - Brand D', price: 1800, rating: 4.3, image: 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400&h=400&fit=crop', badge: 'NBFC Licensed', safetyScore: 88 },
-      { name: 'Mutual Fund - Brand E', price: 5000, rating: 4.5, image: 'https://images.unsplash.com/photo-1485925832434-374f4b0e0b04?w=400&h=400&fit=crop', badge: 'AMFI Registered', safetyScore: 92 },
-      { name: 'Banking Service - Brand F', price: 3500, rating: 4.2, image: 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400&h=400&fit=crop', badge: 'RBI Licensed', discount: 20, safetyScore: 89 },
+      { _id: 'health-insurance-brand-a', name: 'Health Insurance - Brand A', price: 8500, rating: 4.6, image: 'https://images.unsplash.com/photo-1485925832434-374f4b0e0b04?w=400&h=400&fit=crop', badge: 'IRDAI Approved', safetyScore: 94 },
+      { _id: 'investment-plan-brand-b', name: 'Investment Plan - Brand B', price: 12000, rating: 4.4, image: 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400&h=400&fit=crop', badge: 'SEBI Registered', safetyScore: 91 },
+      { _id: 'credit-card-brand-c', name: 'Credit Card - Brand C', price: 2500, rating: 4.7, image: 'https://images.unsplash.com/photo-1485925832434-374f4b0e0b04?w=400&h=400&fit=crop', badge: 'RBI Compliant', safetyScore: 95 },
+      { _id: 'loan-service-brand-d', name: 'Loan Service - Brand D', price: 1800, rating: 4.3, image: 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400&h=400&fit=crop', badge: 'NBFC Licensed', safetyScore: 88 },
+      { _id: 'mutual-fund-brand-e', name: 'Mutual Fund - Brand E', price: 5000, rating: 4.5, image: 'https://images.unsplash.com/photo-1485925832434-374f4b0e0b04?w=400&h=400&fit=crop', badge: 'AMFI Registered', safetyScore: 92 },
+      { _id: 'banking-service-brand-f', name: 'Banking Service - Brand F', price: 3500, rating: 4.2, image: 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400&h=400&fit=crop', badge: 'RBI Licensed', discount: 20, safetyScore: 89 },
     ],
     'education-learning': [
-      { name: 'Online Course - Brand A', price: 2800, rating: 4.6, image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop', badge: 'UGC Approved', safetyScore: 93 },
-      { name: 'Study Material - Brand B', price: 450, rating: 4.4, image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop', badge: 'Quality Assured', safetyScore: 89 },
-      { name: 'Tutoring Service - Brand C', price: 1200, rating: 4.7, image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop', badge: 'Verified Tutors', safetyScore: 95 },
-      { name: 'Skill Development - Brand D', price: 850, rating: 4.3, image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop', badge: 'Industry Certified', safetyScore: 87 },
-      { name: 'Language Learning - Brand E', price: 1800, rating: 4.5, image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop', badge: 'Native Speakers', safetyScore: 91 },
-      { name: 'Test Preparation - Brand F', price: 2200, rating: 4.2, image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop', badge: 'Success Guarantee', discount: 15, safetyScore: 88 },
+      { _id: 'online-course-brand-a', name: 'Online Course - Brand A', price: 2800, rating: 4.6, image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop', badge: 'UGC Approved', safetyScore: 93 },
+      { _id: 'study-material-brand-b', name: 'Study Material - Brand B', price: 450, rating: 4.4, image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop', badge: 'Quality Assured', safetyScore: 89 },
+      { _id: 'tutoring-service-brand-c', name: 'Tutoring Service - Brand C', price: 1200, rating: 4.7, image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop', badge: 'Verified Tutors', safetyScore: 95 },
+      { _id: 'skill-development-brand-d', name: 'Skill Development - Brand D', price: 850, rating: 4.3, image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop', badge: 'Industry Certified', safetyScore: 87 },
+      { _id: 'language-learning-brand-e', name: 'Language Learning - Brand E', price: 1800, rating: 4.5, image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop', badge: 'Native Speakers', safetyScore: 91 },
+      { _id: 'test-preparation-brand-f', name: 'Test Preparation - Brand F', price: 2200, rating: 4.2, image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop', badge: 'Success Guarantee', discount: 15, safetyScore: 88 },
     ],
     'travel-tourism': [
-      { name: 'Hotel Booking - Brand A', price: 4500, rating: 4.6, image: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=400&fit=crop', badge: 'Safety Certified', safetyScore: 92 },
-      { name: 'Flight Tickets - Brand B', price: 8500, rating: 4.4, image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop', badge: 'DGCA Approved', safetyScore: 94 },
-      { name: 'Tour Package - Brand C', price: 12500, rating: 4.7, image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=400&fit=crop', badge: 'Government Approved', safetyScore: 96 },
-      { name: 'Car Rental - Brand D', price: 2800, rating: 4.3, image: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=400&fit=crop', badge: 'Insurance Included', safetyScore: 89 },
-      { name: 'Travel Insurance - Brand E', price: 850, rating: 4.5, image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop', badge: 'Comprehensive Cover', safetyScore: 93 },
-      { name: 'Adventure Sports - Brand F', price: 3500, rating: 4.2, image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=400&fit=crop', badge: 'Safety Equipment', discount: 25, safetyScore: 87 },
+      { _id: 'hotel-booking-brand-a', name: 'Hotel Booking - Brand A', price: 4500, rating: 4.6, image: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=400&fit=crop', badge: 'Safety Certified', safetyScore: 92 },
+      { _id: 'flight-tickets-brand-b', name: 'Flight Tickets - Brand B', price: 8500, rating: 4.4, image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop', badge: 'DGCA Approved', safetyScore: 94 },
+      { _id: 'tour-package-brand-c', name: 'Tour Package - Brand C', price: 12500, rating: 4.7, image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=400&fit=crop', badge: 'Government Approved', safetyScore: 96 },
+      { _id: 'car-rental-brand-d', name: 'Car Rental - Brand D', price: 2800, rating: 4.3, image: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=400&fit=crop', badge: 'Insurance Included', safetyScore: 89 },
+      { _id: 'travel-insurance-brand-e', name: 'Travel Insurance - Brand E', price: 850, rating: 4.5, image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop', badge: 'Comprehensive Cover', safetyScore: 93 },
+      { _id: 'adventure-sports-brand-f', name: 'Adventure Sports - Brand F', price: 3500, rating: 4.2, image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=400&fit=crop', badge: 'Safety Equipment', discount: 25, safetyScore: 87 },
     ],
     'all-categories': [
-      { name: 'Organic Apples - Brand A', price: 120, rating: 4.5, image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&h=400&fit=crop', badge: 'FSSAI Certified', discount: 10, safetyScore: 95 },
-      { name: 'Vitamin C Supplements - Brand B', price: 450, rating: 4.6, image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&h=400&fit=crop', badge: 'FSSAI Approved', safetyScore: 94 },
-      { name: 'Smartphone - Brand C', price: 25000, rating: 4.6, image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop', badge: 'BIS Certified', safetyScore: 92 },
-      { name: 'Air Purifier - Brand D', price: 8500, rating: 4.6, image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=400&fit=crop', badge: 'HEPA Filter', safetyScore: 93 },
-      { name: 'Face Cream - Brand E', price: 850, rating: 4.6, image: 'https://images.unsplash.com/photo-1485925832434-374f4b0e0b04?w=400&h=400&fit=crop', badge: 'Dermatologist Tested', safetyScore: 92 },
-      { name: 'Car Air Freshener - Brand F', price: 280, rating: 4.6, image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=400&fit=crop', badge: 'Non-Toxic', safetyScore: 89 },
-      { name: 'Health Insurance - Brand G', price: 8500, rating: 4.6, image: 'https://images.unsplash.com/photo-1485925832434-374f4b0e0b04?w=400&h=400&fit=crop', badge: 'IRDAI Approved', safetyScore: 94 },
-      { name: 'Online Course - Brand H', price: 2800, rating: 4.6, image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop', badge: 'UGC Approved', safetyScore: 93 },
+      { _id: 'organic-apples-brand-a-all', name: 'Organic Apples - Brand A', price: 120, rating: 4.5, image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&h=400&fit=crop', badge: 'FSSAI Certified', discount: 10, safetyScore: 95 },
+      { _id: 'vitamin-c-supplements-brand-b-all', name: 'Vitamin C Supplements - Brand B', price: 450, rating: 4.6, image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&h=400&fit=crop', badge: 'FSSAI Approved', safetyScore: 94 },
+      { _id: 'smartphone-brand-c-all', name: 'Smartphone - Brand C', price: 25000, rating: 4.6, image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop', badge: 'BIS Certified', safetyScore: 92 },
+      { _id: 'air-purifier-brand-d-all', name: 'Air Purifier - Brand D', price: 8500, rating: 4.6, image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=400&fit=crop', badge: 'HEPA Filter', safetyScore: 93 },
+      { _id: 'face-cream-brand-e-all', name: 'Face Cream - Brand E', price: 850, rating: 4.6, image: 'https://images.unsplash.com/photo-1485925832434-374f4b0e0b04?w=400&h=400&fit=crop', badge: 'Dermatologist Tested', safetyScore: 92 },
+      { _id: 'car-air-freshener-brand-f-all', name: 'Car Air Freshener - Brand F', price: 280, rating: 4.6, image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=400&fit=crop', badge: 'Non-Toxic', safetyScore: 89 },
+      { _id: 'health-insurance-brand-g-all', name: 'Health Insurance - Brand G', price: 8500, rating: 4.6, image: 'https://images.unsplash.com/photo-1485925832434-374f4b0e0b04?w=400&h=400&fit=crop', badge: 'IRDAI Approved', safetyScore: 94 },
+      { _id: 'online-course-brand-h-all', name: 'Online Course - Brand H', price: 2800, rating: 4.6, image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop', badge: 'UGC Approved', safetyScore: 93 },
     ]
   };
 
@@ -203,6 +204,9 @@ const Category = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Navigation */}
+      <Navbar />
+      
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 const ConsumerSignup = () => {
   const [formData, setFormData] = useState({
@@ -18,6 +18,8 @@ const ConsumerSignup = () => {
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -100,8 +102,25 @@ const ConsumerSignup = () => {
     // Simulate account creation
     setTimeout(() => {
       setIsLoading(false);
-      alert('Account created successfully! Please login.');
-      // Redirect to login page
+      
+      // Mock user data - store in localStorage
+      const userData = {
+        name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        phone: formData.phone,
+        id: 'user_' + Date.now()
+      };
+      localStorage.setItem('currentUser', JSON.stringify(userData));
+      
+      // Get return URL from search params
+      const returnUrl = searchParams.get('returnUrl');
+      
+      // Redirect to return URL or default to dashboard
+      if (returnUrl) {
+        navigate(returnUrl);
+      } else {
+        navigate('/customer/dashboard');
+      }
     }, 2000);
   };
 
@@ -450,7 +469,10 @@ const ConsumerSignup = () => {
         <div className="text-center">
           <p className="text-gray-600">
             Already have an account?{' '}
-            <Link to="/auth/consumer-login" className="text-blue-600 hover:text-blue-700 font-medium">
+            <Link 
+              to={`/auth/consumer-login${searchParams.get('returnUrl') ? `?returnUrl=${searchParams.get('returnUrl')}` : ''}`} 
+              className="text-blue-600 hover:text-blue-700 font-medium"
+            >
               Sign in here
             </Link>
           </p>

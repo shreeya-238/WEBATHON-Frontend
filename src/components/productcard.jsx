@@ -1,7 +1,8 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const ProductCard = ({ product }) => {
-  const { name, price, rating, image, badge, discount, safetyScore } = product;
+  const { _id = product.name?.replace(/\s+/g, '-').toLowerCase() || 'product', name, price, rating, image, badge, discount, safetyScore } = product;
 
   // Get safety score color based on score
   const getSafetyColor = (score) => {
@@ -20,7 +21,8 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 overflow-hidden group">
+    <Link to={`/product/${_id}`} className="block">
+      <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 overflow-hidden group cursor-pointer">
       {/* Product Image */}
       <div className="relative aspect-square overflow-hidden">
         <img
@@ -111,10 +113,16 @@ const ProductCard = ({ product }) => {
         
         {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-2">
-          <button className="w-full bg-green-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 active:scale-95">
+          <button 
+            onClick={(e) => e.preventDefault()}
+            className="w-full bg-green-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 active:scale-95"
+          >
             Read Reviews
           </button>
-          <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 active:scale-95">
+          <button 
+            onClick={(e) => e.preventDefault()}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 active:scale-95"
+          >
             Report Issue
           </button>
         </div>
@@ -140,6 +148,7 @@ const ProductCard = ({ product }) => {
         )}
       </div>
     </div>
+    </Link>
   );
 };
 

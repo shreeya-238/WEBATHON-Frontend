@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const CompanyLogin = () => {
   const [formData, setFormData] = useState({
@@ -8,6 +8,7 @@ const CompanyLogin = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -42,8 +43,8 @@ const CompanyLogin = () => {
       // Simulate API call for login
       setTimeout(() => {
         setIsLoading(false);
-        // Redirect to dashboard or show success message
-        alert('Login successful! Redirecting to company dashboard...');
+        // Redirect to company dashboard
+        navigate('/company/dashboard');
       }, 2000);
     }
   };
