@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { consumerValidation } from '../../utils/validation';
 import { apiCall, BACKEND_CONFIG } from '../../config/backend';
 
 const ConsumerSignup = () => {
@@ -38,83 +37,34 @@ const ConsumerSignup = () => {
     }
   };
 
-  // Real-time field validation on blur
-  const handleBlur = (e) => {
-    const { name, value } = e.target;
-    const fieldData = { ...formData, [name]: value.trim() };
-    const result = consumerValidation.validate(fieldData, { abortEarly: false });
 
-    if (result.error) {
-      const fieldError = result.error.details.find(err => err.path[0] === name);
-      if (fieldError) {
-        setErrors(prev => ({
-          ...prev,
-          [name]: fieldError.message
-        }));
-      }
-    } else {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
-  };
-
-  // Form submission
+  // Form submission - Mock signup without backend
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Prepare trimmed data for backend
-    const backendData = {
-      role: "consumer",
-      firstName: formData.firstName.trim(),
-      lastName: formData.lastName.trim(),
-      email: formData.email.trim(),
-      phone: formData.phone.trim(),
-      password: formData.password,
-      address: formData.address.trim(),
-      city: formData.city.trim(),
-      state: formData.state.trim(),
-      pincode: formData.pincode.trim(),
-      aadhaarNumber: formData.aadhaarNumber.trim()
-    };
-
-    // FRONTEND Joi validation
-    const validationResult = consumerValidation.validate(backendData, { abortEarly: false });
-    if (validationResult.error) {
-      const errorDetails = {};
-      validationResult.error.details.forEach(err => {
-        errorDetails[err.path[0]] = err.message;
-      });
-      setErrors(errorDetails);
+    // Simulate processing time
+    setTimeout(() => {
+      // Store user data in localStorage to simulate login
+      const userData = {
+        role: 'consumer',
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email
+      };
+      localStorage.setItem('user', JSON.stringify(userData));
+      
+      // Success - Show popup and navigate to products page
+      alert('Account created successfully!');
+      navigate('/products');
       setIsSubmitting(false);
-      return; // Stop submission if validation fails
-    }
-
-    try {
-      // API call
-      const result = await apiCall(BACKEND_CONFIG.ENDPOINTS.AUTH.REGISTER, {
-        method: 'POST',
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(backendData),
-      });
-
-      // Success
-      alert('Consumer account created successfully! Please log in.');
-      navigate('/auth/consumer-login');
-
-    } catch (error) {
-      console.error('Consumer signup error:', error);
-      setErrors({ submit: error.message || 'Signup failed. Please try again.' });
-    } finally {
-      setIsSubmitting(false);
-    }
+    }, 1000);
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <Link to="/" className="flex justify-center mb-6">
+        <Link to="/products" className="flex justify-center mb-6">
           <div className="w-12 h-12 bg-indigo-600 rounded-lg flex items-center justify-center mr-3">
             <span className="text-white text-2xl font-bold">L</span>
           </div>
@@ -127,6 +77,12 @@ const ConsumerSignup = () => {
           Or{' '}
           <Link to="/auth/consumer-login" className="font-medium text-indigo-600 hover:text-indigo-500">
             sign in to your existing account
+          </Link>
+        </p>
+        <p className="mt-2 text-center text-sm text-gray-600">
+          Are you a business?{' '}
+          <Link to="/auth/company-signup" className="font-medium text-indigo-600 hover:text-indigo-500">
+            Sign up as a company
           </Link>
         </p>
       </div>
@@ -153,9 +109,10 @@ const ConsumerSignup = () => {
                   required
                   value={formData.firstName}
                   onChange={handleChange}
-                  onBlur={handleBlur}
                   className={`mt-1 block w-full border rounded-md px-3 py-2 ${errors.firstName ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                   placeholder="Enter first name"
+                  minLength="2"
+                  maxLength="50"
                 />
                 {errors.firstName && <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>}
               </div>
@@ -172,9 +129,10 @@ const ConsumerSignup = () => {
                   required
                   value={formData.lastName}
                   onChange={handleChange}
-                  onBlur={handleBlur}
                   className={`mt-1 block w-full border rounded-md px-3 py-2 ${errors.lastName ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                   placeholder="Enter last name"
+                  minLength="2"
+                  maxLength="50"
                 />
                 {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>}
               </div>
@@ -192,9 +150,10 @@ const ConsumerSignup = () => {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                onBlur={handleBlur}
                 className={`mt-1 block w-full border rounded-md px-3 py-2 ${errors.email ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                 placeholder="Enter email address"
+                minLength="5"
+                maxLength="100"
               />
               {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
             </div>
@@ -211,9 +170,9 @@ const ConsumerSignup = () => {
                 required
                 value={formData.phone}
                 onChange={handleChange}
-                onBlur={handleBlur}
                 className={`mt-1 block w-full border rounded-md px-3 py-2 ${errors.phone ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                 placeholder="Enter 10-digit phone number"
+                minLength="10"
                 maxLength="10"
               />
               {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
@@ -231,9 +190,10 @@ const ConsumerSignup = () => {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                onBlur={handleBlur}
                 className={`mt-1 block w-full border rounded-md px-3 py-2 ${errors.password ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                 placeholder="Minimum 8 characters with number and special character"
+                minLength="8"
+                maxLength="50"
               />
               {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
               <p className="mt-1 text-xs text-gray-500">
@@ -252,10 +212,11 @@ const ConsumerSignup = () => {
                 required
                 value={formData.address}
                 onChange={handleChange}
-                onBlur={handleBlur}
                 rows="3"
                 className={`mt-1 block w-full border rounded-md px-3 py-2 ${errors.address ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                 placeholder="Enter your complete address"
+                minLength="10"
+                maxLength="200"
               />
               {errors.address && <p className="mt-1 text-sm text-red-600">{errors.address}</p>}
             </div>
@@ -273,9 +234,10 @@ const ConsumerSignup = () => {
                   required
                   value={formData.city}
                   onChange={handleChange}
-                  onBlur={handleBlur}
                   className={`mt-1 block w-full border rounded-md px-3 py-2 ${errors.city ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                   placeholder="Enter city"
+                  minLength="2"
+                  maxLength="50"
                 />
                 {errors.city && <p className="mt-1 text-sm text-red-600">{errors.city}</p>}
               </div>
@@ -291,9 +253,10 @@ const ConsumerSignup = () => {
                   required
                   value={formData.state}
                   onChange={handleChange}
-                  onBlur={handleBlur}
                   className={`mt-1 block w-full border rounded-md px-3 py-2 ${errors.state ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                   placeholder="Enter state"
+                  minLength="2"
+                  maxLength="50"
                 />
                 {errors.state && <p className="mt-1 text-sm text-red-600">{errors.state}</p>}
               </div>
@@ -309,9 +272,9 @@ const ConsumerSignup = () => {
                   required
                   value={formData.pincode}
                   onChange={handleChange}
-                  onBlur={handleBlur}
                   className={`mt-1 block w-full border rounded-md px-3 py-2 ${errors.pincode ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                   placeholder="Enter 6-digit pincode"
+                  minLength="6"
                   maxLength="6"
                 />
                 {errors.pincode && <p className="mt-1 text-sm text-red-600">{errors.pincode}</p>}
@@ -330,9 +293,9 @@ const ConsumerSignup = () => {
                 required
                 value={formData.aadhaarNumber}
                 onChange={handleChange}
-                onBlur={handleBlur}
                 className={`mt-1 block w-full border rounded-md px-3 py-2 ${errors.aadhaarNumber ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                 placeholder="Enter 12-digit Aadhaar number"
+                minLength="12"
                 maxLength="12"
               />
               {errors.aadhaarNumber && <p className="mt-1 text-sm text-red-600">{errors.aadhaarNumber}</p>}

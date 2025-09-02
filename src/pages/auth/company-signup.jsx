@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { companyValidation, validateForm, validateField } from '../../utils/validation';
-import { apiCall, BACKEND_CONFIG } from '../../config/backend';
 
 const CompanySignup = () => {
   const navigate = useNavigate();
@@ -53,78 +51,33 @@ const CompanySignup = () => {
     }
   };
 
-  const handleBlur = (e) => {
-    const { name, value } = e.target;
-    const fieldError = validateField(companyValidation, name, value);
-    if (fieldError) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: fieldError
-      }));
-    }
-  };
-
+  // Form submission - Mock signup without backend
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Validate entire form
-    const validation = validateForm(companyValidation, formData);
-    
-    if (!validation.isValid) {
-      setErrors(validation.errors);
-      setIsSubmitting(false);
-      return;
-    }
-
-    try {
-      // Prepare data for backend - match your exact structure
-      const backendData = {
-        role: "company",
-        email: formData.email,
-        phone: formData.phone,
-        password: formData.password,
+    // Simulate processing time
+    setTimeout(() => {
+      // Store user data in localStorage to simulate login
+      const userData = {
+        role: 'company',
         companyName: formData.companyName,
         ownerName: formData.ownerName,
-        companyAddress: formData.companyAddress,
-        city: formData.city,
-        state: formData.state,
-        pincode: formData.pincode,
-        panNumber: formData.panNumber,
-        gstinNumber: formData.gstinNumber,
-        businessType: formData.businessType,
-        businessDescription: formData.businessDescription
+        email: formData.email
       };
-
-      // Send data to backend using API configuration
-      const result = await apiCall(BACKEND_CONFIG.ENDPOINTS.AUTH.REGISTER, {
-        method: 'POST',
-        body: JSON.stringify(backendData),
-      });
-
-      // Handle successful signup
-      console.log('Company signup successful:', result);
+      localStorage.setItem('user', JSON.stringify(userData));
       
-      // Show success message
-      alert('Company account created successfully! Please log in.');
-      
-      // Redirect to login page
-      navigate('/auth/company-login');
-      
-    } catch (error) {
-      console.error('Company signup error:', error);
-      setErrors({ 
-        submit: error.message || 'Company signup failed. Please try again.' 
-      });
-    } finally {
+      // Success - Show popup and navigate to products page
+      alert('Account created successfully!');
+      navigate('/products');
       setIsSubmitting(false);
-    }
+    }, 1000);
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <Link to="/" className="flex justify-center mb-6">
+        <Link to="/products" className="flex justify-center mb-6">
           <div className="w-12 h-12 bg-indigo-600 rounded-lg flex items-center justify-center mr-3">
             <span className="text-white text-2xl font-bold">L</span>
           </div>
@@ -162,8 +115,7 @@ const CompanySignup = () => {
                   required
                   value={formData.companyName}
                   onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                    className={`mt-1 block w-full border rounded-md px-3 py-2 ${
                     errors.companyName ? 'border-red-300' : 'border-gray-300'
                   } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                   placeholder="Enter company name"
@@ -184,8 +136,7 @@ const CompanySignup = () => {
                   required
                   value={formData.ownerName}
                   onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                    className={`mt-1 block w-full border rounded-md px-3 py-2 ${
                     errors.ownerName ? 'border-red-300' : 'border-gray-300'
                   } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                   placeholder="Enter owner name"
@@ -208,8 +159,7 @@ const CompanySignup = () => {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                    className={`mt-1 block w-full border rounded-md px-3 py-2 ${
                     errors.email ? 'border-red-300' : 'border-gray-300'
                   } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                   placeholder="Enter email address"
@@ -230,8 +180,7 @@ const CompanySignup = () => {
                   required
                   value={formData.phone}
                   onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                    className={`mt-1 block w-full border rounded-md px-3 py-2 ${
                     errors.phone ? 'border-red-300' : 'border-gray-300'
                   } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                   placeholder="Enter 10-digit phone number"
@@ -254,7 +203,6 @@ const CompanySignup = () => {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                onBlur={handleBlur}
                 className={`mt-1 block w-full border rounded-md px-3 py-2 ${
                   errors.password ? 'border-red-300' : 'border-gray-300'
                 } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
@@ -278,7 +226,6 @@ const CompanySignup = () => {
                 required
                 value={formData.companyAddress}
                 onChange={handleChange}
-                onBlur={handleBlur}
                 rows="3"
                 className={`mt-1 block w-full border rounded-md px-3 py-2 ${
                   errors.companyAddress ? 'border-red-300' : 'border-gray-300'
@@ -302,8 +249,7 @@ const CompanySignup = () => {
                   required
                   value={formData.city}
                   onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                    className={`mt-1 block w-full border rounded-md px-3 py-2 ${
                     errors.city ? 'border-red-300' : 'border-gray-300'
                   } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                   placeholder="Enter city"
@@ -324,8 +270,7 @@ const CompanySignup = () => {
                   required
                   value={formData.state}
                   onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                    className={`mt-1 block w-full border rounded-md px-3 py-2 ${
                     errors.state ? 'border-red-300' : 'border-gray-300'
                   } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                   placeholder="Enter state"
@@ -346,8 +291,7 @@ const CompanySignup = () => {
                   required
                   value={formData.pincode}
                   onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                    className={`mt-1 block w-full border rounded-md px-3 py-2 ${
                     errors.pincode ? 'border-red-300' : 'border-gray-300'
                   } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                   placeholder="Enter 6-digit pincode"
@@ -371,8 +315,7 @@ const CompanySignup = () => {
                   required
                   value={formData.panNumber}
                   onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                    className={`mt-1 block w-full border rounded-md px-3 py-2 ${
                     errors.panNumber ? 'border-red-300' : 'border-gray-300'
                   } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                   placeholder="e.g., ABCDE1234F"
@@ -397,8 +340,7 @@ const CompanySignup = () => {
                   required
                   value={formData.gstinNumber}
                   onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                    className={`mt-1 block w-full border rounded-md px-3 py-2 ${
                     errors.gstinNumber ? 'border-red-300' : 'border-gray-300'
                   } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                   placeholder="Enter 15-character GSTIN"
@@ -423,7 +365,6 @@ const CompanySignup = () => {
                 required
                 value={formData.businessType}
                 onChange={handleChange}
-                onBlur={handleBlur}
                 className={`mt-1 block w-full border rounded-md px-3 py-2 ${
                   errors.businessType ? 'border-red-300' : 'border-gray-300'
                 } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
@@ -450,7 +391,6 @@ const CompanySignup = () => {
                 required
                 value={formData.businessDescription}
                 onChange={handleChange}
-                onBlur={handleBlur}
                 rows="4"
                 maxLength="500"
                 className={`mt-1 block w-full border rounded-md px-3 py-2 ${

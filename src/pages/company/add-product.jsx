@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
   Package, 
   Save,
   AlertCircle,
-  CheckCircle,
-  Plus,
-  X
+  CheckCircle
 } from 'lucide-react';
 
 const AddProduct = () => {
@@ -18,117 +16,83 @@ const AddProduct = () => {
   
   // Form state
   const [formData, setFormData] = useState({
-    product_id: '',
+    id: `PROD-${Date.now()}`, // Auto-generated ID
     name: '',
     brand: '',
     category: '',
     subcategory: '',
     description: '',
     price: '',
-    currency: 'USD',
+    currency: 'INR',
     image_url: '',
     barcode: '',
     specifications: {},
-    trust_badges: []
+    made_in_india: false,
+    eco_friendly: false,
+    FSSAI_certified: false
   });
 
-  // Dynamic specification fields
-  const [specificationFields, setSpecificationFields] = useState([{ key: '', value: '' }]);
-  
-  // Dynamic trust badge fields
-  const [trustBadgeFields, setTrustBadgeFields] = useState(['']);
-
   const categories = [
-    'Electronics',
     'Fashion',
-    'Home & Garden',
-    'Sports & Outdoors',
-    'Automotive',
     'Food & Beverages',
-    'Books & Media',
-    'Gaming',
-    'Tools & Hardware',
-    'Health & Beauty'
+    'Electronics',
+    'Personal Care',
+    'Home & Kitchen',
+    'Health & Wellness'
   ];
 
-  const currencies = ['USD', 'EUR', 'GBP', 'INR', 'JPY', 'CAD', 'AUD'];
+  const currencies = ['INR', 'USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD'];
+
+  // Dynamic specifications based on category
+  const categorySpecifications = {
+    'Fashion': ['gender', 'season', 'colour'],
+    'Food & Beverages': ['weight_volume', 'shelf_life', 'vegetarian'],
+    'Electronics': ['warranty', 'power', 'connectivity'],
+    'Personal Care': ['volume', 'skin_type', 'shelf_life'],
+    'Home & Kitchen': ['material', 'warranty', 'dimension'],
+    'Health & Wellness': ['serving_size', 'capsules_daily', 'quantity']
+  };
+
+  // Update specifications when category changes
+  useEffect(() => {
+    if (formData.category && categorySpecifications[formData.category]) {
+      const newSpecs = {};
+      categorySpecifications[formData.category].forEach(field => {
+        newSpecs[field] = formData.specifications[field] || '';
+      });
+      setFormData(prev => ({ ...prev, specifications: newSpecs }));
+    }
+  }, [formData.category]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
-  const handleSpecificationChange = (index, field, value) => {
-    const newSpecs = [...specificationFields];
-    newSpecs[index][field] = value;
-    setSpecificationFields(newSpecs);
-    
-    // Update formData specifications
-    const specifications = {};
-    newSpecs.forEach(spec => {
-      if (spec.key && spec.value) {
-        specifications[spec.key] = spec.value;
+  const handleSpecificationChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      specifications: {
+        ...prev.specifications,
+        [field]: value
       }
-    });
-    setFormData(prev => ({ ...prev, specifications }));
+    }));
   };
 
-  const addSpecificationField = () => {
-    setSpecificationFields([...specificationFields, { key: '', value: '' }]);
-  };
-
-  const removeSpecificationField = (index) => {
-    if (specificationFields.length > 1) {
-      const newSpecs = specificationFields.filter((_, i) => i !== index);
-      setSpecificationFields(newSpecs);
-      
-      // Update formData specifications
-      const specifications = {};
-      newSpecs.forEach(spec => {
-        if (spec.key && spec.value) {
-          specifications[spec.key] = spec.value;
-        }
-      });
-      setFormData(prev => ({ ...prev, specifications }));
-    }
-  };
-
-  const handleTrustBadgeChange = (index, value) => {
-    const newBadges = [...trustBadgeFields];
-    newBadges[index] = value;
-    setTrustBadgeFields(newBadges);
-    
-    // Update formData trust_badges
-    const trust_badges = newBadges.filter(badge => badge.trim() !== '');
-    setFormData(prev => ({ ...prev, trust_badges }));
-  };
-
-  const addTrustBadgeField = () => {
-    setTrustBadgeFields([...trustBadgeFields, '']);
-  };
-
-  const removeTrustBadgeField = (index) => {
-    if (trustBadgeFields.length > 1) {
-      const newBadges = trustBadgeFields.filter((_, i) => i !== index);
-      setTrustBadgeFields(newBadges);
-      
-      // Update formData trust_badges
-      const trust_badges = newBadges.filter(badge => badge.trim() !== '');
-      setFormData(prev => ({ ...prev, trust_badges }));
-    }
+  const handleBooleanChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validation
-    if (!formData.product_id.trim()) {
-      setError('Product ID is required');
-      return;
-    }
     if (!formData.name.trim()) {
       setError('Product name is required');
       return;
@@ -240,18 +204,16 @@ const AddProduct = () => {
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="product_id" className="block text-sm font-medium text-gray-700 mb-2">
-                  Product ID *
+                <label htmlFor="id" className="block text-sm font-medium text-gray-700 mb-2">
+                  Product ID (Auto-generated)
                 </label>
                 <input
                   type="text"
-                  id="product_id"
-                  name="product_id"
-                  value={formData.product_id}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter unique product ID"
-                  required
+                  id="id"
+                  name="id"
+                  value={formData.id}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
+                  disabled
                 />
               </div>
 
@@ -415,88 +377,121 @@ const AddProduct = () => {
               </div>
             </div>
 
-            {/* Specifications */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <label className="block text-sm font-medium text-gray-700">
-                  Specifications
+            {/* Dynamic Specifications based on Category */}
+            {formData.category && categorySpecifications[formData.category] && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-4">
+                  Category Specifications
                 </label>
-                <button
-                  type="button"
-                  onClick={addSpecificationField}
-                  className="flex items-center space-x-1 text-blue-600 hover:text-blue-700 text-sm"
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>Add Specification</span>
-                </button>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {categorySpecifications[formData.category].map((field) => (
+                    <div key={field}>
+                      <label htmlFor={field} className="block text-sm font-medium text-gray-700 mb-2 capitalize">
+                        {field.replace('_', ' / ')} {field === 'vegetarian' ? '' : '*'}
+                      </label>
+                      {field === 'vegetarian' ? (
+                        <div className="flex space-x-4">
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="vegetarian"
+                              value="true"
+                              checked={formData.specifications.vegetarian === 'true'}
+                              onChange={(e) => handleSpecificationChange('vegetarian', e.target.value)}
+                              className="mr-2"
+                            />
+                            Yes
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="vegetarian"
+                              value="false"
+                              checked={formData.specifications.vegetarian === 'false'}
+                              onChange={(e) => handleSpecificationChange('vegetarian', e.target.value)}
+                              className="mr-2"
+                            />
+                            No
+                          </label>
+                        </div>
+                      ) : (
+                        <input
+                          type="text"
+                          id={field}
+                          value={formData.specifications[field] || ''}
+                          onChange={(e) => handleSpecificationChange(field, e.target.value)}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder={`Enter ${field.replace('_', ' / ')}`}
+                          required
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="space-y-3">
-                {specificationFields.map((spec, index) => (
-                  <div key={index} className="flex space-x-3">
-                    <input
-                      type="text"
-                      value={spec.key}
-                      onChange={(e) => handleSpecificationChange(index, 'key', e.target.value)}
-                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Specification name (e.g., Weight)"
-                    />
-                    <input
-                      type="text"
-                      value={spec.value}
-                      onChange={(e) => handleSpecificationChange(index, 'value', e.target.value)}
-                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Specification value (e.g., 2.5kg)"
-                    />
-                    {specificationFields.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeSpecificationField(index)}
-                        className="px-3 py-3 text-red-600 hover:text-red-700"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
+            )}
 
-            {/* Trust Badges */}
+            {/* Boolean Toggles */}
             <div>
-              <div className="flex items-center justify-between mb-3">
-                <label className="block text-sm font-medium text-gray-700">
-                  Trust Badges
-                </label>
-                <button
-                  type="button"
-                  onClick={addTrustBadgeField}
-                  className="flex items-center space-x-1 text-blue-600 hover:text-blue-700 text-sm"
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>Add Badge</span>
-                </button>
-              </div>
-              <div className="space-y-3">
-                {trustBadgeFields.map((badge, index) => (
-                  <div key={index} className="flex space-x-3">
-                    <input
-                      type="text"
-                      value={badge}
-                      onChange={(e) => handleTrustBadgeChange(index, e.target.value)}
-                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Enter trust badge (e.g., ISO Certified)"
+              <label className="block text-sm font-medium text-gray-700 mb-4">
+                Product Certifications
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Made in India */}
+                <div className="flex items-center justify-between p-4 border border-gray-300 rounded-lg">
+                  <span className="text-sm font-medium text-gray-700">Made in India</span>
+                  <button
+                    type="button"
+                    onClick={() => handleBooleanChange('made_in_india', !formData.made_in_india)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      formData.made_in_india ? 'bg-blue-600' : 'bg-gray-200'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        formData.made_in_india ? 'translate-x-6' : 'translate-x-1'
+                      }`}
                     />
-                    {trustBadgeFields.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeTrustBadgeField(index)}
-                        className="px-3 py-3 text-red-600 hover:text-red-700"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    )}
+                  </button>
+                </div>
+
+                {/* Eco Friendly */}
+                <div className="flex items-center justify-between p-4 border border-gray-300 rounded-lg">
+                  <span className="text-sm font-medium text-gray-700">Eco Friendly</span>
+                  <button
+                    type="button"
+                    onClick={() => handleBooleanChange('eco_friendly', !formData.eco_friendly)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      formData.eco_friendly ? 'bg-green-600' : 'bg-gray-200'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        formData.eco_friendly ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {/* FSSAI Certified - only show for Food & Beverages or Personal Care */}
+                {(formData.category === 'Food & Beverages' || formData.category === 'Personal Care') && (
+                  <div className="flex items-center justify-between p-4 border border-gray-300 rounded-lg">
+                    <span className="text-sm font-medium text-gray-700">FSSAI Certified</span>
+                    <button
+                      type="button"
+                      onClick={() => handleBooleanChange('FSSAI_certified', !formData.FSSAI_certified)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        formData.FSSAI_certified ? 'bg-orange-600' : 'bg-gray-200'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          formData.FSSAI_certified ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
                   </div>
-                ))}
+                )}
               </div>
             </div>
 

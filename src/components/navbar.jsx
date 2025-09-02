@@ -1,64 +1,148 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAuthDropdownOpen, setIsAuthDropdownOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  const navItems = [
-    { label: 'Products', to: '/products' },
-    { label: 'Analytics Dashboard', to: '/analytics' },
-  ];
+
+  // Check authentication status
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
+
+  // Handle My Account click
+  const handleMyAccountClick = () => {
+    if (user) {
+      // User is logged in - redirect to appropriate dashboard
+      if (user.role === 'company') {
+        navigate('/company/dashboard');
+      } else if (user.role === 'consumer') {
+        navigate('/customer/dashboard');
+      }
+    } else {
+      // User not logged in - redirect to signup page
+      navigate('/auth/consumer-signup');
+    }
+  };
 
   return (
-    <nav className="bg-white shadow-sm border-b sticky top-0 z-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="bg-white shadow-sm border-b sticky top-0 z-20 w-full">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         {/* Main Navigation */}
-        <div className="flex items-center h-16 gap-4 py-2">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3">
-            <div className="bg-green-600 text-white rounded-lg p-2">
-              <span className="text-xl font-bold">T</span>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900">TrustConsumer</h1>
-          </Link>
-
-          {/* Center: Desktop Nav Links */}
-          <div className="hidden md:flex items-center space-x-6 ml-2">
-            {navItems.map((item) => (
-              <Link key={item.to} to={item.to} className="text-gray-700 hover:text-green-600 transition-colors">
-                {item.label}
-              </Link>
-            ))}
+        <div className="flex items-center justify-between h-12 w-full">
+          {/* Left: Logo and Site Name */}
+          <div className="flex items-center">
+            <Link to="/products" className="flex items-center space-x-2">
+              <div className="bg-green-600 text-white rounded-md p-1">
+                <span className="text-sm font-bold">T</span>
+              </div>
+              <h1 className="text-lg font-semibold text-gray-900">TrustConsumer</h1>
+            </Link>
           </div>
 
-          {/* Center-right: Search (Desktop) */}
-          <div className="hidden md:flex items-center flex-1 max-w-xl mx-6">
-            <div className="relative w-full">
+          {/* Center: Navigation Links */}
+          <div className="hidden md:flex items-center space-x-8">
+            <Link 
+              to="/products" 
+              className="text-sm font-medium text-gray-700 hover:text-green-600 transition-colors"
+            >
+              Products
+            </Link>
+            <Link 
+              to="/analytics" 
+              className="text-sm font-medium text-gray-700 hover:text-green-600 transition-colors"
+            >
+              Analytics
+            </Link>
+          </div>
+
+          {/* Right: Search, My Account, Login/Signup */}
+          <div className="flex items-center space-x-3">
+            {/* Search Bar */}
+            <div className="hidden md:block relative">
               <input
                 type="text"
-                placeholder="Search for products..."
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Search products..."
+                className="w-64 pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500"
               />
-              <svg className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="absolute left-2.5 top-2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
-          </div>
 
-          {/* Right: Actions + Mobile Menu Button */}
-          <div className="ml-auto flex items-center space-x-2">
-            <button className="hidden md:inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium bg-gradient-to-r from-green-600 to-green-500 text-white hover:from-green-700 hover:to-green-600">My Account</button>
-            <button className="hidden md:inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium border border-gray-300 text-gray-900 hover:bg-gray-50">Share</button>
-            <div className="hidden md:flex w-9 h-9 rounded-full bg-gray-100 items-center justify-center text-gray-700">👤</div>
-            <Link to="/auth/consumer-signup" className="hidden lg:inline-flex items-center justify-center px-3 py-2 rounded-lg font-medium text-gray-700 hover:text-green-600">Login / Sign Up</Link>
+            {/* My Account Button */}
+            <button 
+              onClick={handleMyAccountClick}
+              className="hidden md:inline-flex items-center px-3 py-1.5 text-sm font-medium bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+            >
+              My Account
+            </button>
+
+            {/* Auth Dropdown */}
+            <div className="hidden md:block relative">
+              <button
+                onClick={() => setIsAuthDropdownOpen(!isAuthDropdownOpen)}
+                className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-green-600 transition-colors"
+              >
+                Login / Sign Up
+                <svg className="ml-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {isAuthDropdownOpen && (
+                <div className="absolute right-0 mt-1 w-44 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+                  <div className="py-1">
+                    <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Consumer</div>
+                    <Link
+                      to="/auth/consumer-signup"
+                      onClick={() => setIsAuthDropdownOpen(false)}
+                      className="block px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Sign Up
+                    </Link>
+                    <Link
+                      to="/auth/consumer-login"
+                      onClick={() => setIsAuthDropdownOpen(false)}
+                      className="block px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Login
+                    </Link>
+                    <div className="border-t border-gray-100 my-1"></div>
+                    <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Company</div>
+                    <Link
+                      to="/auth/company-signup"
+                      onClick={() => setIsAuthDropdownOpen(false)}
+                      className="block px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Sign Up
+                    </Link>
+                    <Link
+                      to="/auth/company-login"
+                      onClick={() => setIsAuthDropdownOpen(false)}
+                      className="block px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Login
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Menu Button */}
             <button
-              className="md:hidden p-2 rounded-md hover:bg-gray-100"
+              className="md:hidden p-1.5 rounded-md hover:bg-gray-100"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Toggle Menu"
             >
-              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
@@ -67,43 +151,80 @@ const Navbar = () => {
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-gray-100">
-            <div className="px-4 py-4 space-y-3">
+            <div className="px-4 py-3 space-y-2">
               {/* Mobile Search */}
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search for products..."
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Search products..."
+                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500"
                 />
-                <svg className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
 
-              {/* Links */}
-              {navItems.map((item) => (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block text-gray-700 hover:text-green-600"
-                >
-                  {item.label}
-                </Link>
-              ))}
-
-              {/* Actions */}
-              <div className="flex items-center space-x-3 pt-2">
-                <button className="flex-1 px-4 py-2 rounded-lg font-medium bg-gradient-to-r from-green-600 to-green-500 text-white">My Account</button>
-                <button className="px-4 py-2 rounded-lg font-medium border border-gray-300 text-gray-900">Share</button>
-              </div>
+              {/* Navigation Links */}
               <Link
-                to="/auth/consumer-signup"
+                to="/products"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="block text-center text-gray-700 hover:text-green-600"
+                className="block py-2 text-sm font-medium text-gray-700 hover:text-green-600"
               >
-                Login / Sign Up
+                Products
               </Link>
+              <Link
+                to="/analytics"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block py-2 text-sm font-medium text-gray-700 hover:text-green-600"
+              >
+                Analytics
+              </Link>
+
+              {/* My Account Button */}
+              <button 
+                onClick={() => {
+                  handleMyAccountClick();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full mt-3 px-3 py-2 text-sm font-medium bg-green-600 text-white rounded-md hover:bg-green-700"
+              >
+                My Account
+              </button>
+
+              {/* Mobile Auth Options */}
+              <div className="border-t border-gray-100 pt-3 mt-3">
+                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Consumer</div>
+                <Link
+                  to="/auth/consumer-signup"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block py-1.5 text-sm text-gray-700 hover:text-green-600"
+                >
+                  Sign Up
+                </Link>
+                <Link
+                  to="/auth/consumer-login"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block py-1.5 text-sm text-gray-700 hover:text-green-600"
+                >
+                  Login
+                </Link>
+                
+                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mt-3 mb-2">Company</div>
+                <Link
+                  to="/auth/company-signup"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block py-1.5 text-sm text-gray-700 hover:text-green-600"
+                >
+                  Sign Up
+                </Link>
+                <Link
+                  to="/auth/company-login"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block py-1.5 text-sm text-gray-700 hover:text-green-600"
+                >
+                  Login
+                </Link>
+              </div>
             </div>
           </div>
         )}
