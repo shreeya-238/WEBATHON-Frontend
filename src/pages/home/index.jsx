@@ -28,8 +28,8 @@ const Home = () => {
               <form onSubmit={handleGetOtp} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Phone or Email</label>
-                <input
-                  type="text"
+                  <input
+                    type="text"
                     value={contact}
                     onChange={(e) => setContact(e.target.value)}
                     placeholder="Enter phone or email"
@@ -46,13 +46,14 @@ const Home = () => {
                 </button>
               </form>
               <div className="mt-4 text-sm text-gray-600 flex items-center justify-between">
+                {/* --- CHANGE #4: Use href instead of to --- */}
                 <Link to="/auth/consumer-login" className="hover:text-green-600">Already have an account?</Link>
                 <Link to="/auth/company-signup" className="hover:text-green-600">For Businesses</Link>
-            </div>
+              </div>
               <div className="mt-3 text-center">
-                <Link to="/products" className="text-gray-500 hover:text-gray-700 underline">
+                <Link href="/products" className="text-gray-500 hover:text-gray-700 underline">
                   Skip for now
-                    </Link>
+                </Link>
               </div>
             </div>
           </div>
@@ -66,43 +67,44 @@ const Home = () => {
         </section>
       </main>
 
-      {/* Footer */}
+      {/* Footer (all <Link> components updated to use href) */}
       <footer className="bg-gray-900 text-gray-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div>
+          <div>
             <h4 className="text-white text-lg font-semibold mb-4">TrustConsumer</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/" className="hover:text-white">Home</Link></li>
-              <li><Link to="/products" className="hover:text-white">Products</Link></li>
-              <li><Link to="/analytics" className="hover:text-white">Analytics Dashboard</Link></li>
-              <li><Link to="/contact" className="hover:text-white">Contact</Link></li>
+              <li><Link href="/" className="hover:text-white">Home</Link></li>
+              <li><Link href="/products" className="hover:text-white">Products</Link></li>
+              <li><Link href="/analytics" className="hover:text-white">Analytics Dashboard</Link></li>
+              <li><Link href="/contact" className="hover:text-white">Contact</Link></li>
             </ul>
-            </div>
-            <div>
-            <h4 className="text-white text-lg font-semibold mb-4">Resources</h4>
-            <ul className="space-y-2 text-sm">
-              <li><a className="hover:text-white" href="#">Docs</a></li>
-              <li><a className="hover:text-white" href="#">Blog</a></li>
-              <li><a className="hover:text-white" href="#">Community</a></li>
-              </ul>
-            </div>
-            <div>
-            <h4 className="text-white text-lg font-semibold mb-4">Legal</h4>
-            <ul className="space-y-2 text-sm">
-              <li><a className="hover:text-white" href="#">Privacy</a></li>
-              <li><a className="hover:text-white" href="#">Terms</a></li>
-              <li><a className="hover:text-white" href="#">Compliance</a></li>
-              </ul>
-            </div>
-            <div>
-            <h4 className="text-white text-lg font-semibold mb-4">Follow</h4>
-            <div className="flex space-x-4 text-xl">
-              <a href="#" aria-label="Facebook" className="hover:text-white">📘</a>
-              <a href="#" aria-label="Twitter" className="hover:text-white">🐦</a>
-              <a href="#" aria-label="Instagram" className="hover:text-white">📸</a>
-              <a href="#" aria-label="LinkedIn" className="hover:text-white">💼</a>
-            </div>
           </div>
+          <div>
+        <h4 className="text-white text-lg font-semibold mb-4">Resources</h4>
+        <ul className="space-y-2 text-sm">
+          <li><a className="hover:text-white" href="#">Docs</a></li>
+          <li><a className="hover:text-white" href="#">Blog</a></li>
+          <li><a className="hover:text-white" href="#">Community</a></li>
+          </ul>
+        </div>
+        <div>
+        <h4 className="text-white text-lg font-semibold mb-4">Legal</h4>
+        <ul className="space-y-2 text-sm">
+          <li><a className="hover:text-white" href="#">Privacy</a></li>
+          <li><a className="hover:text-white" href="#">Terms</a></li>
+          <li><a className="hover:text-white" href="#">Compliance</a></li>
+          </ul>
+        </div>
+        <div>
+        <h4 className="text-white text-lg font-semibold mb-4">Follow</h4>
+        <div className="flex space-x-4 text-xl">
+          <a href="#" aria-label="Facebook" className="hover:text-white">📘</a>
+          <a href="#" aria-label="Twitter" className="hover:text-white">🐦</a>
+          <a href="#" aria-label="Instagram" className="hover:text-white">📸</a>
+          <a href="#" aria-label="LinkedIn" className="hover:text-white">💼</a>
+        </div>
+      </div>
+          {/* Other footer sections are fine, just make sure any <Link> uses href */}
         </div>
         <div className="border-t border-gray-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 text-sm flex flex-col sm:flex-row items-center justify-between">
