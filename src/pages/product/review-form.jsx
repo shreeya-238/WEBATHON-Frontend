@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   ArrowLeft, 
-  Star, 
   User, 
   MessageSquare, 
   Send,
   AlertCircle,
   CheckCircle
 } from 'lucide-react';
+import StarRating from '../../components/StarRating.jsx';
 
 const ReviewForm = () => {
   const { id } = useParams();
@@ -22,8 +22,54 @@ const ReviewForm = () => {
   // Form state
   const [formData, setFormData] = useState({
     user_name: '',
-    review_text: ''
+    review_text: '',
+    overall_rating: 0,
+    criteria_ratings: {}
   });
+
+  const categoryCriteria = [
+    {
+      category: "Food & Beverages",
+      criteria: ["Safety", "Freshness", "Taste/Nutrition"],
+    },
+    {
+      category: "Cosmetics & Personal Care",
+      criteria: ["Safety", "Effectiveness", "Skin Compatibility"],
+    },
+    {
+      category: "Clothing & Apparel",
+      criteria: ["Material Quality", "Size & Fit", "Durability"],
+    },
+    {
+      category: "Electronics & Gadgets",
+      criteria: ["Performance", "Durability", "Safety"],
+    },
+    {
+      category: "Home Appliances",
+      criteria: ["Performance", "Durability", "Safety"],
+    },
+    {
+      category: "Toys & Baby Products",
+      criteria: ["Safety", "Build Quality", "Durability"],
+    },
+    {
+      category: "Furniture & Home Décor",
+      criteria: ["Material Quality", "Durability", "Size/Dimensions"],
+    },
+    {
+      category: "Pharmaceuticals & Health Products",
+      criteria: ["Safety", "Effectiveness", "Label Accuracy"],
+    },
+  ];
+
+  const getCriteriaForCategory = (category) => {
+    if (!category) return [];
+    const exact = categoryCriteria.find(c => c.category === category);
+    if (exact) return exact.criteria;
+    const normalized = category.toLowerCase();
+    const fuzzy = categoryCriteria.find(c => normalized.includes(c.category.toLowerCase().split('&')[0].trim()));
+    return fuzzy ? fuzzy.criteria : [];
+  };
 
   // Check if user is authenticated (mock implementation)
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -53,10 +99,10 @@ const ReviewForm = () => {
         // Mock product data - replace with actual API call
         const mockProduct = {
           _id: id,
-          name: "Premium Wireless Headphones",
-          brand: "AudioTech Pro",
-          category: "Electronics",
-          image_url: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500"
+          name: "Organic Almond Milk",
+          brand: "GreenHarvest",
+          category: "Food & Beverages",
+          image_url: "https://images.unsplash.com/photo-1544025162-d76694265947?w=500&auto=format&fit=crop&q=60"
         };
         setProduct(mockProduct);
       } catch (error) {
@@ -102,6 +148,8 @@ const ReviewForm = () => {
         product_id: id,
         user_name: formData.user_name,
         review_text: formData.review_text,
+        overall_rating: formData.overall_rating,
+        criteria_ratings: formData.criteria_ratings,
         date: new Date().toISOString()
       };
 
@@ -271,11 +319,47 @@ const ReviewForm = () => {
               )}
             </div>
 
+            {/* Overall Rating */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Overall Rating
+              </label>
+              <StarRating
+                value={formData.overall_rating}
+                onChange={(val) => setFormData(prev => ({ ...prev, overall_rating: val }))}
+                name="overall_rating"
+              />
+            </div>
+
+            {/* Criteria Ratings by Category */}
+            {product?.category && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Rate by Criteria ({product.category})
+                </label>
+                <div className="space-y-3">
+                  {getCriteriaForCategory(product.category).map((crit) => (
+                    <div key={crit} className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700 mr-4">{crit}</span>
+                      <StarRating
+                        value={formData.criteria_ratings[crit] || 0}
+                        onChange={(val) => setFormData(prev => ({
+                          ...prev,
+                          criteria_ratings: { ...prev.criteria_ratings, [crit]: val }
+                        }))}
+                        name={`criteria_${crit}`}
+                        size={20}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Review Text */}
             <div>
               <label htmlFor="review_text" className="block text-sm font-medium text-gray-700 mb-2">
-                Your Review *
+                Overall Description *
               </label>
               <textarea
                 id="review_text"
@@ -284,7 +368,7 @@ const ReviewForm = () => {
                 onChange={handleInputChange}
                 rows={6}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
-                placeholder="Share your experience with this product. What did you like or dislike? How was the quality, value, and performance?"
+                placeholder="Share your overall experience. Include details that explain your ratings."
                 required
               />
               <p className="mt-1 text-sm text-gray-500">

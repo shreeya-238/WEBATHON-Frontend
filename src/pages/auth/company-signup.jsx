@@ -1,32 +1,49 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { companyValidation, validateForm, validateField } from '../../utils/validation';
+import { apiCall, BACKEND_CONFIG } from '../../config/backend';
 
 const CompanySignup = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     companyName: '',
     ownerName: '',
     email: '',
     phone: '',
     password: '',
-    confirmPassword: '',
-    address: '',
+    companyAddress: '',
     city: '',
     state: '',
     pincode: '',
     panNumber: '',
     gstinNumber: '',
     businessType: '',
-    description: ''
+    businessDescription: ''
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState({});
 
-  const handleInputChange = (e) => {
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const businessTypes = [
+    'Manufacturing',
+    'Retail',
+    'Wholesale',
+    'Service',
+    'Technology',
+    'Healthcare',
+    'Food & Beverage',
+    'Fashion',
+    'Automotive',
+    'Other'
+  ];
+
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
@@ -36,386 +53,430 @@ const CompanySignup = () => {
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!formData.companyName.trim()) newErrors.companyName = 'Company name is required';
-    if (!formData.ownerName.trim()) newErrors.ownerName = 'Owner name is required';
-    if (!formData.email.trim()) newErrors.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
-    if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
-    else if (!/^\d{10}$/.test(formData.phone)) newErrors.phone = 'Phone number must be 10 digits';
-    if (!formData.password) newErrors.password = 'Password is required';
-    else if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
-    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
-    if (!formData.address.trim()) newErrors.address = 'Address is required';
-    if (!formData.city.trim()) newErrors.city = 'City is required';
-    if (!formData.state.trim()) newErrors.state = 'State is required';
-    if (!formData.pincode.trim()) newErrors.pincode = 'Pincode is required';
-    else if (!/^\d{6}$/.test(formData.pincode)) newErrors.pincode = 'Pincode must be 6 digits';
-    if (!formData.panNumber.trim()) newErrors.panNumber = 'PAN number is required';
-    else if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.panNumber.toUpperCase())) newErrors.panNumber = 'PAN number format is invalid';
-    if (!formData.gstinNumber.trim()) newErrors.gstinNumber = 'GSTIN number is required';
-    else if (!/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(formData.gstinNumber.toUpperCase())) newErrors.gstinNumber = 'GSTIN number format is invalid';
-    if (!formData.businessType.trim()) newErrors.businessType = 'Business type is required';
-    if (!formData.description.trim()) newErrors.description = 'Business description is required';
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    const fieldError = validateField(companyValidation, name, value);
+    if (fieldError) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: fieldError
+      }));
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      setIsLoading(true);
-      // Simulate API call for company registration
-      setTimeout(() => {
-        setIsLoading(false);
-        // Redirect to login or show success message
-        alert('Company account created successfully! Please wait for admin approval.');
-      }, 2000);
+    setIsSubmitting(true);
+
+    // Validate entire form
+    const validation = validateForm(companyValidation, formData);
+    
+    if (!validation.isValid) {
+      setErrors(validation.errors);
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      // Prepare data for backend - match your exact structure
+      const backendData = {
+        role: "company",
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+        companyName: formData.companyName,
+        ownerName: formData.ownerName,
+        companyAddress: formData.companyAddress,
+        city: formData.city,
+        state: formData.state,
+        pincode: formData.pincode,
+        panNumber: formData.panNumber,
+        gstinNumber: formData.gstinNumber,
+        businessType: formData.businessType,
+        businessDescription: formData.businessDescription
+      };
+
+      // Send data to backend using API configuration
+      const result = await apiCall(BACKEND_CONFIG.ENDPOINTS.AUTH.REGISTER, {
+        method: 'POST',
+        body: JSON.stringify(backendData),
+      });
+
+      // Handle successful signup
+      console.log('Company signup successful:', result);
+      
+      // Show success message
+      alert('Company account created successfully! Please log in.');
+      
+      // Redirect to login page
+      navigate('/auth/company-login');
+      
+    } catch (error) {
+      console.error('Company signup error:', error);
+      setErrors({ 
+        submit: error.message || 'Company signup failed. Please try again.' 
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl w-full space-y-8">
-        <div>
-          <Link to="/" className="flex justify-center mb-6">
-            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
-              <span className="text-white text-2xl font-bold">L</span>
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900">LetsGo</h1>
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+            <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <Link to="/" className="flex justify-center mb-6">
+          <div className="w-12 h-12 bg-indigo-600 rounded-lg flex items-center justify-center mr-3">
+            <span className="text-white text-2xl font-bold">L</span>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900">LetsGo</h1>
+        </Link>
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          Create your company account
+        </h2>
+        <p className="mt-2 text-center text-sm text-gray-600">
+          Or{' '}
+          <Link to="/auth/company-login" className="font-medium text-indigo-600 hover:text-indigo-500">
+            sign in to your existing account
           </Link>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Register Your Company
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Join LetsGo as a business partner and start selling your products
-          </p>
+        </p>
+      </div>
+
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            {errors.submit && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                {errors.submit}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div>
+                <label htmlFor="companyName" className="block text-sm font-medium text-gray-700">
+                  Company Name *
+                </label>
+                <input
+                  id="companyName"
+                  name="companyName"
+                  type="text"
+                  required
+                  value={formData.companyName}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                    errors.companyName ? 'border-red-300' : 'border-gray-300'
+                  } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                  placeholder="Enter company name"
+                />
+                {errors.companyName && (
+                  <p className="mt-1 text-sm text-red-600">{errors.companyName}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="ownerName" className="block text-sm font-medium text-gray-700">
+                  Owner Name *
+                </label>
+                <input
+                  id="ownerName"
+                  name="ownerName"
+                  type="text"
+                  required
+                  value={formData.ownerName}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                    errors.ownerName ? 'border-red-300' : 'border-gray-300'
+                  } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                  placeholder="Enter owner name"
+                />
+                {errors.ownerName && (
+                  <p className="mt-1 text-sm text-red-600">{errors.ownerName}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  Email Address *
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                    errors.email ? 'border-red-300' : 'border-gray-300'
+                  } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                  placeholder="Enter email address"
+                />
+                {errors.email && (
+                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                  Phone Number *
+                </label>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  required
+                  value={formData.phone}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                    errors.phone ? 'border-red-300' : 'border-gray-300'
+                  } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                  placeholder="Enter 10-digit phone number"
+                  maxLength="10"
+                />
+                {errors.phone && (
+                  <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password *
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                value={formData.password}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                  errors.password ? 'border-red-300' : 'border-gray-300'
+                } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                placeholder="Minimum 8 characters with number and special character"
+              />
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+              )}
+              <p className="mt-1 text-xs text-gray-500">
+                Password must be at least 8 characters long and contain at least one number and one special character (!@#$%^&*)
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="companyAddress" className="block text-sm font-medium text-gray-700">
+                Company Address *
+              </label>
+              <textarea
+                id="companyAddress"
+                name="companyAddress"
+                required
+                value={formData.companyAddress}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                rows="3"
+                className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                  errors.companyAddress ? 'border-red-300' : 'border-gray-300'
+                } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                placeholder="Enter company complete address"
+              />
+              {errors.companyAddress && (
+                <p className="mt-1 text-sm text-red-600">{errors.companyAddress}</p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+              <div>
+                <label htmlFor="city" className="block text-sm font-medium text-gray-700">
+                  City *
+                </label>
+                <input
+                  id="city"
+                  name="city"
+                  type="text"
+                  required
+                  value={formData.city}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                    errors.city ? 'border-red-300' : 'border-gray-300'
+                  } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                  placeholder="Enter city"
+                />
+                {errors.city && (
+                  <p className="mt-1 text-sm text-red-600">{errors.city}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="state" className="block text-sm font-medium text-gray-700">
+                  State *
+                </label>
+                <input
+                  id="state"
+                  name="state"
+                  type="text"
+                  required
+                  value={formData.state}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                    errors.state ? 'border-red-300' : 'border-gray-300'
+                  } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                  placeholder="Enter state"
+                />
+                {errors.state && (
+                  <p className="mt-1 text-sm text-red-600">{errors.state}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="pincode" className="block text-sm font-medium text-gray-700">
+                  Pincode *
+                </label>
+                <input
+                  id="pincode"
+                  name="pincode"
+                  type="text"
+                  required
+                  value={formData.pincode}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                    errors.pincode ? 'border-red-300' : 'border-gray-300'
+                  } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                  placeholder="Enter 6-digit pincode"
+                  maxLength="6"
+                />
+                {errors.pincode && (
+                  <p className="mt-1 text-sm text-red-600">{errors.pincode}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div>
+                <label htmlFor="panNumber" className="block text-sm font-medium text-gray-700">
+                  PAN Number *
+                </label>
+                <input
+                  id="panNumber"
+                  name="panNumber"
+                  type="text"
+                  required
+                  value={formData.panNumber}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                    errors.panNumber ? 'border-red-300' : 'border-gray-300'
+                  } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                  placeholder="e.g., ABCDE1234F"
+                  maxLength="10"
+                />
+                {errors.panNumber && (
+                  <p className="mt-1 text-sm text-red-600">{errors.panNumber}</p>
+                )}
+                <p className="mt-1 text-xs text-gray-500">
+                  Format: ABCDE1234F (5 letters + 4 numbers + 1 letter)
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="gstinNumber" className="block text-sm font-medium text-gray-700">
+                  GSTIN *
+                </label>
+                <input
+                  id="gstinNumber"
+                  name="gstinNumber"
+                  type="text"
+                  required
+                  value={formData.gstinNumber}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                    errors.gstinNumber ? 'border-red-300' : 'border-gray-300'
+                  } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                  placeholder="Enter 15-character GSTIN"
+                  maxLength="15"
+                />
+                {errors.gstinNumber && (
+                  <p className="mt-1 text-sm text-red-600">{errors.gstinNumber}</p>
+                )}
+                <p className="mt-1 text-xs text-gray-500">
+                  Format: 15 characters (numbers and letters)
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="businessType" className="block text-sm font-medium text-gray-700">
+                Business Type *
+              </label>
+              <select
+                id="businessType"
+                name="businessType"
+                required
+                value={formData.businessType}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                  errors.businessType ? 'border-red-300' : 'border-gray-300'
+                } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+              >
+                <option value="">Select business type</option>
+                {businessTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+              {errors.businessType && (
+                <p className="mt-1 text-sm text-red-600">{errors.businessType}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="businessDescription" className="block text-sm font-medium text-gray-700">
+                Business Description *
+              </label>
+              <textarea
+                id="businessDescription"
+                name="businessDescription"
+                required
+                value={formData.businessDescription}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                rows="4"
+                maxLength="500"
+                className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                  errors.businessDescription ? 'border-red-300' : 'border-gray-300'
+                } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                placeholder="Describe your business (max 500 characters)"
+              />
+              {errors.businessDescription && (
+                <p className="mt-1 text-sm text-red-600">{errors.businessDescription}</p>
+              )}
+              <p className="mt-1 text-xs text-gray-500">
+                {formData.businessDescription.length}/500 characters
+              </p>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? 'Creating Company Account...' : 'Create Company Account'}
+              </button>
+            </div>
+          </form>
         </div>
-
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
-            {/* Company Information */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Company Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="companyName" className="block text-sm font-medium text-gray-700">
-                    Company Name *
-                  </label>
-                  <input
-                    id="companyName"
-                    name="companyName"
-                    type="text"
-                    required
-                    value={formData.companyName}
-                    onChange={handleInputChange}
-                    className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.companyName ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  />
-                  {errors.companyName && <p className="mt-1 text-sm text-red-600">{errors.companyName}</p>}
-                </div>
-                <div>
-                  <label htmlFor="ownerName" className="block text-sm font-medium text-gray-700">
-                    Owner Name *
-                  </label>
-                  <input
-                    id="ownerName"
-                    name="ownerName"
-                    type="text"
-                    required
-                    value={formData.ownerName}
-                    onChange={handleInputChange}
-                    className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.ownerName ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  />
-                  {errors.ownerName && <p className="mt-1 text-sm text-red-600">{errors.ownerName}</p>}
-                </div>
-              </div>
-            </div>
-
-            {/* Contact Information */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Contact Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                    Email Address *
-                  </label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.email ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  />
-                  {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
-                </div>
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                    Phone Number *
-                  </label>
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    required
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.phone ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  />
-                  {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
-                </div>
-              </div>
-            </div>
-
-            {/* Security */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Security</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                    Password *
-                  </label>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    required
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.password ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  />
-                  {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
-                </div>
-                <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                    Confirm Password *
-                  </label>
-                  <input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
-                    required
-                    value={formData.confirmPassword}
-                    onChange={handleInputChange}
-                    className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  />
-                  {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
-                </div>
-              </div>
-            </div>
-
-            {/* Address */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Business Address</h3>
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                    Address *
-                  </label>
-                  <textarea
-                    id="address"
-                    name="address"
-                    rows="3"
-                    required
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.address ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  />
-                  {errors.address && <p className="mt-1 text-sm text-red-600">{errors.address}</p>}
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label htmlFor="city" className="block text-sm font-medium text-gray-700">
-                      City *
-                    </label>
-                    <input
-                      id="city"
-                      name="city"
-                      type="text"
-                      required
-                      value={formData.city}
-                      onChange={handleInputChange}
-                      className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                        errors.city ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                    />
-                    {errors.city && <p className="mt-1 text-sm text-red-600">{errors.city}</p>}
-                  </div>
-                  <div>
-                    <label htmlFor="state" className="block text-sm font-medium text-gray-700">
-                      State *
-                    </label>
-                    <input
-                      id="state"
-                      name="state"
-                      type="text"
-                      required
-                      value={formData.state}
-                      onChange={handleInputChange}
-                      className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                        errors.state ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                    />
-                    {errors.state && <p className="mt-1 text-sm text-red-600">{errors.state}</p>}
-                  </div>
-                  <div>
-                    <label htmlFor="pincode" className="block text-sm font-medium text-gray-700">
-                      Pincode *
-                    </label>
-                    <input
-                      id="pincode"
-                      name="pincode"
-                      type="text"
-                      required
-                      value={formData.pincode}
-                      onChange={handleInputChange}
-                      className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                        errors.pincode ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                    />
-                    {errors.pincode && <p className="mt-1 text-sm text-red-600">{errors.pincode}</p>}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Business Verification */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Business Verification</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="panNumber" className="block text-sm font-medium text-gray-700">
-                    PAN Number *
-                  </label>
-                  <input
-                    id="panNumber"
-                    name="panNumber"
-                    type="text"
-                    maxLength="10"
-                    required
-                    value={formData.panNumber}
-                    onChange={(e) => handleInputChange({ target: { name: 'panNumber', value: e.target.value.toUpperCase() }})}
-                    placeholder="ABCDE1234F"
-                    className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.panNumber ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  />
-                  {errors.panNumber && <p className="mt-1 text-sm text-red-600">{errors.panNumber}</p>}
-                  <p className="mt-1 text-xs text-gray-500">Format: ABCDE1234F</p>
-                </div>
-                <div>
-                  <label htmlFor="gstinNumber" className="block text-sm font-medium text-gray-700">
-                    GSTIN Number *
-                  </label>
-                  <input
-                    id="gstinNumber"
-                    name="gstinNumber"
-                    type="text"
-                    maxLength="15"
-                    required
-                    value={formData.gstinNumber}
-                    onChange={(e) => handleInputChange({ target: { name: 'gstinNumber', value: e.target.value.toUpperCase() }})}
-                    placeholder="22AAAAA0000A1Z5"
-                    className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.gstinNumber ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  />
-                  {errors.gstinNumber && <p className="mt-1 text-sm text-red-600">{errors.gstinNumber}</p>}
-                  <p className="mt-1 text-xs text-gray-500">Format: 22AAAAA0000A1Z5</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Business Details */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Business Details</h3>
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="businessType" className="block text-sm font-medium text-gray-700">
-                    Business Type *
-                  </label>
-                  <select
-                    id="businessType"
-                    name="businessType"
-                    required
-                    value={formData.businessType}
-                    onChange={handleInputChange}
-                    className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.businessType ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  >
-                    <option value="">Select business type</option>
-                    <option value="retail">Retail</option>
-                    <option value="wholesale">Wholesale</option>
-                    <option value="manufacturing">Manufacturing</option>
-                    <option value="service">Service</option>
-                    <option value="food">Food & Beverages</option>
-                    <option value="electronics">Electronics</option>
-                    <option value="fashion">Fashion & Apparel</option>
-                    <option value="healthcare">Healthcare</option>
-                    <option value="other">Other</option>
-                  </select>
-                  {errors.businessType && <p className="mt-1 text-sm text-red-600">{errors.businessType}</p>}
-                </div>
-                <div>
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                    Business Description *
-                  </label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    rows="4"
-                    required
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    placeholder="Describe your business, products, and services..."
-                    className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.description ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  />
-                  {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description}</p>}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-            >
-              {isLoading ? 'Creating Account...' : 'Create Company Account'}
-            </button>
-          </div>
-
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Already have a company account?{' '}
-              <Link to="/auth/company-login" className="font-medium text-blue-600 hover:text-blue-500">
-                Sign in here
-              </Link>
-            </p>
-          </div>
-        </form>
       </div>
     </div>
   );

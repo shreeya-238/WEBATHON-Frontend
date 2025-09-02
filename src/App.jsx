@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/home';
+import Products from './pages/products.jsx';
+import Analytics from './pages/analytics.jsx';
 import Category from './pages/category';
 
 // Auth Pages
@@ -23,15 +25,18 @@ import SearchResults from './pages/search-results';
 
 // Components
 import Sidebar from './components/sidebar';
+import Navbar from './components/navbar.jsx';
 
 function App() {
   return (
     <Router>
       <div className="relative">
-        <Sidebar />
+        <Navbar />
         <Routes>
           {/* Main Pages */}
           <Route path="/" element={<Home />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/analytics" element={<Analytics />} />
           <Route path="/category/:slug" element={<Category />} />
           
           {/* Consumer Authentication */}

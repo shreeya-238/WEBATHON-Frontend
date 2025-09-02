@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const ProductCard = ({ product }) => {
-  const { _id = product.name?.replace(/\s+/g, '-').toLowerCase() || 'product', name, price, rating, image, badge, discount, safetyScore } = product;
+  const { _id = product.name?.replace(/\s+/g, '-').toLowerCase() || 'product', name, price, rating, image, badge, discount, safetyScore, description, reviewCount, tags } = product;
 
   // Get safety score color based on score
   const getSafetyColor = (score) => {
@@ -22,7 +22,7 @@ const ProductCard = ({ product }) => {
 
   return (
     <Link to={`/product/${_id}`} className="block">
-      <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 overflow-hidden group cursor-pointer">
+      <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 border border-gray-200 overflow-hidden group cursor-pointer">
       {/* Product Image */}
       <div className="relative aspect-square overflow-hidden">
         <img
@@ -69,7 +69,7 @@ const ProductCard = ({ product }) => {
       </div>
 
       {/* Product Info */}
-      <div className="p-4 sm:p-5">
+      <div className="p-4">
         {/* Product Name */}
         <h3 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base line-clamp-2 group-hover:text-green-600 transition-colors duration-300">
           {name}
@@ -90,7 +90,7 @@ const ProductCard = ({ product }) => {
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
             ))}
-            <span className="text-sm text-gray-600 ml-2">({rating})</span>
+            <span className="text-sm text-gray-600 ml-2">{rating?.toFixed ? rating.toFixed(1) : rating} {reviewCount ? `(${reviewCount})` : ''}</span>
           </div>
           
           {/* Safety Level */}
@@ -101,27 +101,43 @@ const ProductCard = ({ product }) => {
           )}
         </div>
         
-        {/* Price */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-2">
-            <span className="text-lg sm:text-xl font-bold text-gray-900">₹{price}</span>
-            {discount && (
-              <span className="text-sm text-gray-500 line-through">₹{Math.round(price * (1 + discount / 100))}</span>
-            )}
+        {/* Description */}
+        {description && (
+          <p className="text-sm text-gray-600 line-clamp-3 mb-3">{description}</p>
+        )}
+
+        {/* Tags */}
+        {Array.isArray(tags) && tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {tags.map((t) => (
+              <span key={t} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-md">{t}</span>
+            ))}
           </div>
-        </div>
+        )}
+
+        {/* Price */}
+        {typeof price !== 'undefined' && (
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-2">
+              <span className="text-lg font-bold text-gray-900">₹{price}</span>
+              {discount && (
+                <span className="text-sm text-gray-500 line-through">₹{Math.round(price * (1 + discount / 100))}</span>
+              )}
+            </div>
+          </div>
+        )}
         
         {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-2">
           <button 
             onClick={(e) => e.preventDefault()}
-            className="w-full bg-green-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 active:scale-95"
+            className="w-full inline-flex items-center justify-center bg-green-600 text-white py-2 px-3 rounded-md font-medium hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
           >
             Read Reviews
           </button>
           <button 
             onClick={(e) => e.preventDefault()}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 active:scale-95"
+            className="w-full inline-flex items-center justify-center bg-blue-600 text-white py-2 px-3 rounded-md font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
           >
             Report Issue
           </button>

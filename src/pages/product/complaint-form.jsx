@@ -9,6 +9,7 @@ import {
   CheckCircle,
   AlertTriangle
 } from 'lucide-react';
+import StarRating from '../../components/StarRating.jsx';
 
 const ComplaintForm = () => {
   const { id } = useParams();
@@ -23,7 +24,7 @@ const ComplaintForm = () => {
   const [formData, setFormData] = useState({
     user_name: '',
     type: '',
-    severity: '',
+    severity: 0,
     title: '',
     description: ''
   });
@@ -39,11 +40,7 @@ const ComplaintForm = () => {
     'safety'
   ];
 
-  const severityLevels = [
-    'low',
-    'medium',
-    'high'
-  ];
+  const severityLabels = ['Very Low', 'Low', 'Medium', 'High', 'Critical'];
 
   useEffect(() => {
     // Mock authentication check - replace with actual auth logic
@@ -69,10 +66,10 @@ const ComplaintForm = () => {
         // Mock product data - replace with actual API call
         const mockProduct = {
           _id: id,
-          name: "Premium Wireless Headphones",
-          brand: "AudioTech Pro",
-          category: "Electronics",
-          image_url: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500"
+          name: "Organic Almond Milk",
+          brand: "GreenHarvest",
+          category: "Food & Beverages",
+          image_url: "https://images.unsplash.com/photo-1544025162-d76694265947?w=500&auto=format&fit=crop&q=60"
         };
         setProduct(mockProduct);
       } catch (error) {
@@ -118,8 +115,8 @@ const ComplaintForm = () => {
       return;
     }
 
-    if (!formData.severity) {
-      setError('Please select a severity level');
+    if (!formData.severity || formData.severity < 1) {
+      setError('Please provide a severity rating');
       return;
     }
 
@@ -333,26 +330,22 @@ const ComplaintForm = () => {
               </select>
             </div>
 
-            {/* Severity Level */}
+            {/* Severity Rating */}
             <div>
-              <label htmlFor="severity" className="block text-sm font-medium text-gray-700 mb-2">
-                Severity Level *
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Severity Rating *
               </label>
-              <select
-                id="severity"
-                name="severity"
-                value={formData.severity}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              >
-                <option value="">Select severity</option>
-                {severityLevels.map((level) => (
-                  <option key={level} value={level}>
-                    {level.charAt(0).toUpperCase() + level.slice(1)}
-                  </option>
-                ))}
-              </select>
+              <div className="flex items-center justify-between">
+                <StarRating
+                  value={formData.severity}
+                  onChange={(val) => setFormData(prev => ({ ...prev, severity: val }))}
+                  name="severity"
+                  max={5}
+                />
+                {formData.severity > 0 && (
+                  <span className="text-sm text-gray-600 ml-4">{severityLabels[formData.severity - 1]}</span>
+                )}
+              </div>
             </div>
 
             {/* Complaint Title */}

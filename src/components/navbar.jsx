@@ -1,88 +1,65 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Menu } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 const Navbar = () => {
-  const [searchTerm, setSearchTerm] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchTerm.trim()) {
-      // Navigate to search results or filter products
-      navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
-    }
-  };
+  const navItems = [
+    { label: 'Products', to: '/products' },
+    { label: 'Analytics Dashboard', to: '/analytics' },
+  ];
 
   return (
-    <nav className="bg-white shadow-sm border-b sticky top-0 z-10">
+    <nav className="bg-white shadow-sm border-b sticky top-0 z-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Navigation */}
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center h-16 gap-4 py-2">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3">
             <div className="bg-green-600 text-white rounded-lg p-2">
               <span className="text-xl font-bold">T</span>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">TrustTag</h1>
+            <h1 className="text-2xl font-bold text-gray-900">TrustConsumer</h1>
           </Link>
 
-          {/* Search Bar - Desktop */}
-          <div className="hidden md:flex flex-1 max-w-lg mx-8">
-            <form onSubmit={handleSearch} className="relative w-full">
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                placeholder="Search products, brands, or categories..."
-                className="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
-              <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-              <button
-                type="submit"
-                className="absolute right-2 top-1.5 bg-green-600 text-white p-1 rounded-md hover:bg-green-700 transition-colors"
-              >
-                <Search className="h-4 w-4" />
-              </button>
-            </form>
+          {/* Center: Desktop Nav Links */}
+          <div className="hidden md:flex items-center space-x-6 ml-2">
+            {navItems.map((item) => (
+              <Link key={item.to} to={item.to} className="text-gray-700 hover:text-green-600 transition-colors">
+                {item.label}
+              </Link>
+            ))}
           </div>
 
-          {/* User Actions */}
-          <div className="flex items-center space-x-4">
-
-            {/* User Account Dropdown - Desktop */}
-            <div className="hidden md:block relative group">
-              <button className="text-gray-600 hover:text-gray-900 transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </button>
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-30 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                <div className="px-4 py-2 text-sm text-gray-700 border-b">
-                  <p className="font-medium">Account Options</p>
-                </div>
-                <div className="px-4 py-2">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Consumer</p>
-                  <Link to="/auth/consumer-login" className="block text-sm text-gray-700 hover:text-green-600 py-1">
-                    Consumer Login
-                  </Link>
-                  <Link to="/auth/consumer-signup" className="block text-sm text-gray-700 hover:text-green-600 py-1">
-                    Consumer Signup
-                  </Link>
-                </div>
-                <div className="px-4 py-2 border-t">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Business</p>
-                  <Link to="/auth/company-login" className="block text-sm text-gray-700 hover:text-green-600 py-1">
-                    Company Login
-                  </Link>
-                  <Link to="/auth/company-signup" className="block text-sm text-gray-700 hover:text-green-600 py-1">
-                    Company Signup
-                  </Link>
-                </div>
-              </div>
+          {/* Center-right: Search (Desktop) */}
+          <div className="hidden md:flex items-center flex-1 max-w-xl mx-6">
+            <div className="relative w-full">
+              <input
+                type="text"
+                placeholder="Search for products..."
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+              <svg className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
             </div>
+          </div>
+
+          {/* Right: Actions + Mobile Menu Button */}
+          <div className="ml-auto flex items-center space-x-2">
+            <button className="hidden md:inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium bg-gradient-to-r from-green-600 to-green-500 text-white hover:from-green-700 hover:to-green-600">My Account</button>
+            <button className="hidden md:inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium border border-gray-300 text-gray-900 hover:bg-gray-50">Share</button>
+            <div className="hidden md:flex w-9 h-9 rounded-full bg-gray-100 items-center justify-center text-gray-700">👤</div>
+            <Link to="/auth/consumer-signup" className="hidden lg:inline-flex items-center justify-center px-3 py-2 rounded-lg font-medium text-gray-700 hover:text-green-600">Login / Sign Up</Link>
+            <button
+              className="md:hidden p-2 rounded-md hover:bg-gray-100"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Toggle Menu"
+            >
+              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
           </div>
         </div>
 
@@ -90,66 +67,43 @@ const Navbar = () => {
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-gray-100">
-            {/* Mobile Search */}
-            <div className="p-4">
-              <form onSubmit={handleSearch} className="relative">
+            <div className="px-4 py-4 space-y-3">
+              {/* Mobile Search */}
+              <div className="relative">
                 <input
                   type="text"
-                  value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
-                  placeholder="Search products, brands, or categories..."
-                  className="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Search for products..."
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
-                <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                <button
-                  type="submit"
-                  className="absolute right-2 top-1.5 bg-green-600 text-white p-1 rounded-md hover:bg-green-700 transition-colors"
-                >
-                  <Search className="h-4 w-4" />
-                </button>
-              </form>
-            </div>
-
-
-            {/* Mobile User Actions */}
-            <div className="px-4 pb-4 border-t border-gray-100 pt-4">
-              <h3 className="text-sm font-medium text-gray-900 mb-3">Account</h3>
-              <div className="space-y-2">
-                <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Consumer</p>
-                  <Link 
-                    to="/auth/consumer-login" 
-                    className="block text-sm text-gray-700 hover:text-green-600 py-1"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Consumer Login
-                  </Link>
-                  <Link 
-                    to="/auth/consumer-signup" 
-                    className="block text-sm text-gray-700 hover:text-green-600 py-1"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Consumer Signup
-                  </Link>
-                </div>
-                <div className="pt-2">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Business</p>
-                  <Link 
-                    to="/auth/company-login" 
-                    className="block text-sm text-gray-700 hover:text-green-600 py-1"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Company Login
-                  </Link>
-                  <Link 
-                    to="/auth/company-signup" 
-                    className="block text-sm text-gray-700 hover:text-green-600 py-1"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Company Signup
-                  </Link>
-                </div>
+                <svg className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
               </div>
+
+              {/* Links */}
+              {navItems.map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block text-gray-700 hover:text-green-600"
+                >
+                  {item.label}
+                </Link>
+              ))}
+
+              {/* Actions */}
+              <div className="flex items-center space-x-3 pt-2">
+                <button className="flex-1 px-4 py-2 rounded-lg font-medium bg-gradient-to-r from-green-600 to-green-500 text-white">My Account</button>
+                <button className="px-4 py-2 rounded-lg font-medium border border-gray-300 text-gray-900">Share</button>
+              </div>
+              <Link
+                to="/auth/consumer-signup"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block text-center text-gray-700 hover:text-green-600"
+              >
+                Login / Sign Up
+              </Link>
             </div>
           </div>
         )}

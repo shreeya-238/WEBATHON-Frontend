@@ -1,33 +1,35 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { consumerValidation } from '../../utils/validation';
+import { apiCall, BACKEND_CONFIG } from '../../config/backend';
 
 const ConsumerSignup = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
     password: '',
-    confirmPassword: '',
     address: '',
     city: '',
     state: '',
-    pincode: ''
+    pincode: '',
+    aadhaarNumber: ''
   });
-  const [step, setStep] = useState(1); // 1: Basic details, 2: Aadhar verification, 3: OTP verification
-  const [otp, setOtp] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState({});
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
 
-  const handleInputChange = (e) => {
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Handle input change
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-    // Clear error when user starts typing
+
+    // Clear error as user types
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -36,446 +38,317 @@ const ConsumerSignup = () => {
     }
   };
 
-  const validateBasicDetails = () => {
-    const newErrors = {};
-    
-    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
-    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
-    if (!formData.email.trim()) newErrors.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
-    
-    if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
-    else if (!/^\d{10}$/.test(formData.phone)) newErrors.phone = 'Phone number must be 10 digits';
-    
-    if (!formData.password) newErrors.password = 'Password is required';
-    else if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
-    
-    if (!formData.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
-    else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
-    
-    if (!formData.address.trim()) newErrors.address = 'Address is required';
-    if (!formData.city.trim()) newErrors.city = 'City is required';
-    if (!formData.state.trim()) newErrors.state = 'State is required';
-    if (!formData.pincode.trim()) newErrors.pincode = 'Pincode is required';
-    else if (!/^\d{6}$/.test(formData.pincode)) newErrors.pincode = 'Pincode must be 6 digits';
+  // Real-time field validation on blur
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    const fieldData = { ...formData, [name]: value.trim() };
+    const result = consumerValidation.validate(fieldData, { abortEarly: false });
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const validateAadhar = () => {
-    const newErrors = {};
-    if (!formData.aadharNumber) newErrors.aadharNumber = 'Aadhar number is required';
-    else if (!/^\d{12}$/.test(formData.aadharNumber)) newErrors.aadharNumber = 'Aadhar number must be 12 digits';
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleBasicDetailsSubmit = (e) => {
-    e.preventDefault();
-    if (validateBasicDetails()) {
-      setStep(2);
-    }
-  };
-
-  const handleAadharSubmit = (e) => {
-    e.preventDefault();
-    if (validateAadhar()) {
-      setIsLoading(true);
-      // Simulate OTP sending
-      setTimeout(() => {
-        setIsLoading(false);
-        setStep(3);
-      }, 2000);
-    }
-  };
-
-  const handleOTPSubmit = (e) => {
-    e.preventDefault();
-    if (!otp.trim()) {
-      setErrors({ otp: 'OTP is required' });
-      return;
-    }
-    
-    setIsLoading(true);
-    // Simulate account creation
-    setTimeout(() => {
-      setIsLoading(false);
-      
-      // Mock user data - store in localStorage
-      const userData = {
-        name: `${formData.firstName} ${formData.lastName}`,
-        email: formData.email,
-        phone: formData.phone,
-        id: 'user_' + Date.now()
-      };
-      localStorage.setItem('currentUser', JSON.stringify(userData));
-      
-      // Get return URL from search params
-      const returnUrl = searchParams.get('returnUrl');
-      
-      // Redirect to return URL or default to dashboard
-      if (returnUrl) {
-        navigate(returnUrl);
-      } else {
-        navigate('/customer/dashboard');
+    if (result.error) {
+      const fieldError = result.error.details.find(err => err.path[0] === name);
+      if (fieldError) {
+        setErrors(prev => ({
+          ...prev,
+          [name]: fieldError.message
+        }));
       }
-    }, 2000);
+    } else {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
   };
 
-  const resendOTP = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      alert('OTP resent successfully!');
-    }, 1000);
+  // Form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    // Prepare trimmed data for backend
+    const backendData = {
+      role: "consumer",
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim(),
+      email: formData.email.trim(),
+      phone: formData.phone.trim(),
+      password: formData.password,
+      address: formData.address.trim(),
+      city: formData.city.trim(),
+      state: formData.state.trim(),
+      pincode: formData.pincode.trim(),
+      aadhaarNumber: formData.aadhaarNumber.trim()
+    };
+
+    // FRONTEND Joi validation
+    const validationResult = consumerValidation.validate(backendData, { abortEarly: false });
+    if (validationResult.error) {
+      const errorDetails = {};
+      validationResult.error.details.forEach(err => {
+        errorDetails[err.path[0]] = err.message;
+      });
+      setErrors(errorDetails);
+      setIsSubmitting(false);
+      return; // Stop submission if validation fails
+    }
+
+    try {
+      // API call
+      const result = await apiCall(BACKEND_CONFIG.ENDPOINTS.AUTH.REGISTER, {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(backendData),
+      });
+
+      // Success
+      alert('Consumer account created successfully! Please log in.');
+      navigate('/auth/consumer-login');
+
+    } catch (error) {
+      console.error('Consumer signup error:', error);
+      setErrors({ submit: error.message || 'Signup failed. Please try again.' });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Logo and Title */}
-        <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-blue-600 rounded-full flex items-center justify-center mb-4">
-            <span className="text-2xl font-bold text-white">L</span>
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <Link to="/" className="flex justify-center mb-6">
+          <div className="w-12 h-12 bg-indigo-600 rounded-lg flex items-center justify-center mr-3">
+            <span className="text-white text-2xl font-bold">L</span>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h2>
-          <p className="text-gray-600">Join LetsGo as a consumer</p>
-        </div>
+          <h1 className="text-3xl font-bold text-gray-900">LetsGo</h1>
+        </Link>
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          Create your consumer account
+        </h2>
+        <p className="mt-2 text-center text-sm text-gray-600">
+          Or{' '}
+          <Link to="/auth/consumer-login" className="font-medium text-indigo-600 hover:text-indigo-500">
+            sign in to your existing account
+          </Link>
+        </p>
+      </div>
 
-        {/* Progress Steps */}
-        <div className="flex items-center justify-center space-x-4 mb-8">
-          {[1, 2, 3].map((stepNumber) => (
-            <div key={stepNumber} className="flex items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                step >= stepNumber 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-200 text-gray-500'
-              }`}>
-                {stepNumber}
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            {errors.submit && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                {errors.submit}
               </div>
-              {stepNumber < 3 && (
-                <div className={`w-8 h-1 mx-2 ${
-                  step > stepNumber ? 'bg-blue-600' : 'bg-gray-200'
-                }`}></div>
-              )}
-            </div>
-          ))}
-        </div>
+            )}
 
-        {/* Step 1: Basic Details */}
-        {step === 1 && (
-          <form onSubmit={handleBasicDetailsSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              {/* First Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
                   First Name *
                 </label>
                 <input
-                  type="text"
+                  id="firstName"
                   name="firstName"
+                  type="text"
+                  required
                   value={formData.firstName}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.firstName ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${errors.firstName ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                   placeholder="Enter first name"
                 />
-                {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>}
+                {errors.firstName && <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>}
               </div>
-              
+
+              {/* Last Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
                   Last Name *
                 </label>
                 <input
-                  type="text"
+                  id="lastName"
                   name="lastName"
+                  type="text"
+                  required
                   value={formData.lastName}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.lastName ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${errors.lastName ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                   placeholder="Enter last name"
                 />
-                {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>}
+                {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>}
               </div>
             </div>
 
+            {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email Address *
               </label>
               <input
-                type="email"
+                id="email"
                 name="email"
+                type="email"
+                required
                 value={formData.email}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.email ? 'border-red-500' : 'border-gray-300'
-                }`}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={`mt-1 block w-full border rounded-md px-3 py-2 ${errors.email ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                 placeholder="Enter email address"
               />
-              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
             </div>
 
+            {/* Phone */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
                 Phone Number *
               </label>
               <input
-                type="tel"
+                id="phone"
                 name="phone"
+                type="tel"
+                required
                 value={formData.phone}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.phone ? 'border-red-500' : 'border-gray-300'
-                }`}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={`mt-1 block w-full border rounded-md px-3 py-2 ${errors.phone ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                 placeholder="Enter 10-digit phone number"
                 maxLength="10"
               />
-              {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
+              {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Password *
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.password ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="Enter password"
-                />
-                {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Confirm Password *
-                </label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="Confirm password"
-                />
-                {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
-              </div>
-            </div>
-
+            {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password *
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                value={formData.password}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={`mt-1 block w-full border rounded-md px-3 py-2 ${errors.password ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                placeholder="Minimum 8 characters with number and special character"
+              />
+              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+              <p className="mt-1 text-xs text-gray-500">
+                Password must be at least 8 characters long and contain at least one number and one special character (!@#$%^&*)
+              </p>
+            </div>
+
+            {/* Address */}
+            <div>
+              <label htmlFor="address" className="block text-sm font-medium text-gray-700">
                 Address *
               </label>
               <textarea
+                id="address"
                 name="address"
+                required
                 value={formData.address}
-                onChange={handleInputChange}
+                onChange={handleChange}
+                onBlur={handleBlur}
                 rows="3"
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.address ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Enter your full address"
+                className={`mt-1 block w-full border rounded-md px-3 py-2 ${errors.address ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                placeholder="Enter your complete address"
               />
-              {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
+              {errors.address && <p className="mt-1 text-sm text-red-600">{errors.address}</p>}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* City, State, Pincode */}
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="city" className="block text-sm font-medium text-gray-700">
                   City *
                 </label>
                 <input
-                  type="text"
+                  id="city"
                   name="city"
+                  type="text"
+                  required
                   value={formData.city}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.city ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="City"
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${errors.city ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                  placeholder="Enter city"
                 />
-                {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
+                {errors.city && <p className="mt-1 text-sm text-red-600">{errors.city}</p>}
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="state" className="block text-sm font-medium text-gray-700">
                   State *
                 </label>
                 <input
-                  type="text"
+                  id="state"
                   name="state"
+                  type="text"
+                  required
                   value={formData.state}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.state ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="State"
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${errors.state ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                  placeholder="Enter state"
                 />
-                {errors.state && <p className="text-red-500 text-sm mt-1">{errors.state}</p>}
+                {errors.state && <p className="mt-1 text-sm text-red-600">{errors.state}</p>}
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="pincode" className="block text-sm font-medium text-gray-700">
                   Pincode *
                 </label>
                 <input
-                  type="text"
+                  id="pincode"
                   name="pincode"
+                  type="text"
+                  required
                   value={formData.pincode}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.pincode ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="6 digits"
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`mt-1 block w-full border rounded-md px-3 py-2 ${errors.pincode ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                  placeholder="Enter 6-digit pincode"
                   maxLength="6"
                 />
-                {errors.pincode && <p className="text-red-500 text-sm mt-1">{errors.pincode}</p>}
+                {errors.pincode && <p className="mt-1 text-sm text-red-600">{errors.pincode}</p>}
               </div>
             </div>
 
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
-            >
-              Continue to Aadhar Verification
-            </button>
-          </form>
-        )}
-
-        {/* Step 2: Aadhar Verification */}
-        {step === 2 && (
-          <form onSubmit={handleAadharSubmit} className="space-y-6">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Aadhar Verification</h3>
-              <p className="text-gray-600">Enter your 12-digit Aadhar number for verification</p>
-            </div>
-
+            {/* Aadhaar Number */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Aadhar Number *
+              <label htmlFor="aadhaarNumber" className="block text-sm font-medium text-gray-700">
+                Aadhaar Number *
               </label>
               <input
+                id="aadhaarNumber"
+                name="aadhaarNumber"
                 type="text"
-                name="aadharNumber"
-                value={formData.aadharNumber || ''}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.aadharNumber ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="XXXX XXXX XXXX"
+                required
+                value={formData.aadhaarNumber}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={`mt-1 block w-full border rounded-md px-3 py-2 ${errors.aadhaarNumber ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                placeholder="Enter 12-digit Aadhaar number"
                 maxLength="12"
               />
-              {errors.aadharNumber && <p className="text-red-500 text-sm mt-1">{errors.aadharNumber}</p>}
-              <p className="text-xs text-gray-500 mt-1">We'll send an OTP to your registered mobile number</p>
+              {errors.aadhaarNumber && <p className="mt-1 text-sm text-red-600">{errors.aadhaarNumber}</p>}
             </div>
 
-            <div className="flex space-x-4">
-              <button
-                type="button"
-                onClick={() => setStep(1)}
-                className="flex-1 bg-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-400 transition-colors duration-200"
-              >
-                Back
-              </button>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50"
-              >
-                {isLoading ? 'Sending OTP...' : 'Send OTP'}
-              </button>
-            </div>
-          </form>
-        )}
-
-        {/* Step 3: OTP Verification */}
-        {step === 3 && (
-          <form onSubmit={handleOTPSubmit} className="space-y-6">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">OTP Verification</h3>
-              <p className="text-gray-600">Enter the 6-digit OTP sent to your mobile</p>
-            </div>
-
+            {/* Submit Button */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                OTP *
-              </label>
-              <input
-                type="text"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.otp ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Enter 6-digit OTP"
-                maxLength="6"
-              />
-              {errors.otp && <p className="text-red-500 text-sm mt-1">{errors.otp}</p>}
-            </div>
-
-            <div className="flex space-x-4">
-              <button
-                type="button"
-                onClick={() => setStep(2)}
-                className="flex-1 bg-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-400 transition-colors duration-200"
-              >
-                Back
-              </button>
               <button
                 type="submit"
-                disabled={isLoading}
-                className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50"
+                disabled={isSubmitting}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? 'Creating Account...' : 'Create Account'}
-              </button>
-            </div>
-
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={resendOTP}
-                disabled={isLoading}
-                className="text-blue-600 hover:text-blue-700 text-sm font-medium disabled:opacity-50"
-              >
-                Didn't receive OTP? Resend
+                {isSubmitting ? 'Creating Account...' : 'Create Account'}
               </button>
             </div>
           </form>
-        )}
-
-        {/* Login Link */}
-        <div className="text-center">
-          <p className="text-gray-600">
-            Already have an account?{' '}
-            <Link 
-              to={`/auth/consumer-login${searchParams.get('returnUrl') ? `?returnUrl=${searchParams.get('returnUrl')}` : ''}`} 
-              className="text-blue-600 hover:text-blue-700 font-medium"
-            >
-              Sign in here
-            </Link>
-          </p>
         </div>
       </div>
     </div>
