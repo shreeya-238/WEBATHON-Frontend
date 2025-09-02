@@ -38,32 +38,40 @@ const ConsumerLogin = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
       setIsLoading(true);
-      // Simulate API call for login
-      setTimeout(() => {
-        setIsLoading(false);
-        
-        // Mock user data - store in localStorage
-        const userData = {
-          name: formData.email.split('@')[0],
-          email: formData.email,
-          id: 'user_' + Date.now()
-        };
-        localStorage.setItem('currentUser', JSON.stringify(userData));
-        
-        // Get return URL from search params
-        const returnUrl = searchParams.get('returnUrl');
-        
-        // Redirect to return URL or default to dashboard
-        if (returnUrl) {
-          navigate(returnUrl);
-        } else {
-          navigate('/customer/dashboard');
+      setErrors({});
+
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const response = await fetch(`${apiUrl}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+          }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message || 'Login failed.');
         }
-      }, 2000);
+
+        // SUCCESS
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        const returnUrl = searchParams.get('returnUrl');
+        navigate(returnUrl || '/customer/dashboard');
+
+      } catch (err) {
+        setErrors({ api: err.message }); // Display API errors
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 

@@ -38,27 +38,38 @@ const ConsumerSignup = () => {
   };
 
 
-  // Form submission - Mock signup without backend
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrors({});
 
-    // Simulate processing time
-    setTimeout(() => {
-      // Store user data in localStorage to simulate login
-      const userData = {
-        role: 'consumer',
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email
-      };
-      localStorage.setItem('user', JSON.stringify(userData));
-      
-      // Success - Show popup and navigate to products page
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${apiUrl}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          role: 'consumer' // Add the role to the request
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to create account.');
+      }
+
+      // SUCCESS
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
       alert('Account created successfully!');
       navigate('/products');
+
+    } catch (err) {
+      setErrors({ submit: err.message });
+    } finally {
       setIsSubmitting(false);
-    }, 1000);
+    }
   };
 
   return (

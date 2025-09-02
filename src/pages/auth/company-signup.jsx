@@ -51,28 +51,41 @@ const CompanySignup = () => {
     }
   };
 
-  // Form submission - Mock signup without backend
+  // Form submission  
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  e.preventDefault();
+  setIsSubmitting(true);
+  setErrors({}); // Assuming you have an 'errors' state for backend messages
 
-    // Simulate processing time
-    setTimeout(() => {
-      // Store user data in localStorage to simulate login
-      const userData = {
-        role: 'company',
-        companyName: formData.companyName,
-        ownerName: formData.ownerName,
-        email: formData.email
-      };
-      localStorage.setItem('user', JSON.stringify(userData));
-      
-      // Success - Show popup and navigate to products page
-      alert('Account created successfully!');
-      navigate('/products');
-      setIsSubmitting(false);
-    }, 1000);
-  };
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const response = await fetch(`${apiUrl}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...formData, // Send all the form data
+        role: 'company' // Add the role to the request
+      }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to create company account.');
+    }
+
+    // --- SIGNUP SUCCESS ---
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    
+    alert('Company account created successfully!');
+    navigate('/company/dashboard'); // Redirect to the company dashboard
+
+  } catch (err) {
+    setErrors({ submit: err.message }); // Display the error from the backend
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
