@@ -6,7 +6,8 @@ import {
   MessageSquare, 
   Send,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 import StarRating from '../../components/StarRating.jsx';
 
@@ -17,14 +18,15 @@ const ReviewForm = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [rejected, setRejected] = useState(false);
   const [error, setError] = useState('');
   
   // Form state
   const [formData, setFormData] = useState({
     user_name: '',
-    review_text: '',
+    text: '', // Changed from review_text to text
     overall_rating: 0,
-    criteria_ratings: {}
+    ratings: {} // Changed from criteria_ratings to ratings
   });
 
   const categoryCriteria = [
@@ -92,11 +94,15 @@ const ReviewForm = () => {
       }
     };
 
-    // Fetch product details
+    // Fetch product details - REPLACE WITH ACTUAL API CALL
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        // Mock product data - replace with actual API call
+        // TODO: Replace with actual API call to your backend
+        // const response = await fetch(`http://localhost:5000/api/products/${id}`);
+        // const productData = await response.json();
+        
+        // Mock product data for now
         const mockProduct = {
           _id: id,
           name: "Organic Almond Milk",
@@ -125,54 +131,78 @@ const ReviewForm = () => {
     }));
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // if (!isAuthenticated) {
-    //   setError('Please sign up or log in to submit a review');
-    //   return;
-    // }
-
-    if (!formData.review_text.trim()) {
+    if (!formData.text.trim()) {
       setError('Please enter your review');
+      return;
+    }
+
+    if (!formData.user_name.trim()) {
+      setError('Please enter your name');
+      return;
+    }
+
+    if (formData.overall_rating === 0) {
+      setError('Please provide an overall rating');
       return;
     }
 
     try {
       setSubmitting(true);
       setError('');
+      setRejected(false);
 
-      // Mock API call - replace with actual API endpoint
+      // Prepare review data for backend
       const reviewData = {
-        product_id: id,
+        productId: id, // Changed from product_id to productId
         user_name: formData.user_name,
-        review_text: formData.review_text,
+        text: formData.text, // Changed from review_text to text
         overall_rating: formData.overall_rating,
-        criteria_ratings: formData.criteria_ratings,
-        date: new Date().toISOString()
+        ratings: formData.ratings, // Changed from criteria_ratings to ratings
+        // userId will be added when authentication is implemented
       };
 
       console.log('Submitting review:', reviewData);
       
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // ACTUAL API CALL TO YOUR BACKEND
+      const response = await fetch('http://localhost:5000/api/reviews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reviewData),
+      });
+
+      const result = await response.json();
       
-      setSubmitted(true);
-      
-      // Redirect back to product page after 2 seconds
-      setTimeout(() => {
-        navigate(`/product/${id}`);
-      }, 2000);
+      if (response.ok && result.success) {
+        console.log('Review submitted successfully:', result);
+        setSubmitted(true);
+        
+        // Redirect back to product page after 3 seconds
+        setTimeout(() => {
+          navigate(`/product/${id}`);
+        }, 3000);
+        
+      } else {
+        // Handle rejection by ML pipeline
+        if (result.rejected) {
+          setRejected(true);
+          setError(result.message + (result.reason ? `: ${result.reason}` : ''));
+        } else {
+          setError(result.message || 'Failed to submit review. Please try again.');
+        }
+      }
 
     } catch (error) {
       console.error('Error submitting review:', error);
-      setError('Failed to submit review. Please try again.');
+      setError('Failed to connect to server. Please check your connection and try again.');
     } finally {
       setSubmitting(false);
     }
   };
-
 
   if (loading) {
     return (
@@ -185,47 +215,6 @@ const ReviewForm = () => {
     );
   }
 
-  // if (!isAuthenticated) {
-  //   return (
-  //     <div className="min-h-screen bg-gray-50">
-  //       <div className="bg-white shadow-sm border-b">
-  //         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-  //           <div className="flex items-center py-4">
-  //             <Link to={`/product/${id}`} className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
-  //               <ArrowLeft className="h-5 w-5" />
-  //               <span>Back to Product</span>
-  //             </Link>
-  //           </div>
-  //         </div>
-  //       </div>
-
-  //       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-  //         <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
-  //           <AlertCircle className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
-  //           <h2 className="text-2xl font-bold text-gray-900 mb-4">Authentication Required</h2>
-  //           <p className="text-gray-600 mb-6">
-  //             You need to be signed up and logged in to submit a review.
-  //           </p>
-  //           <div className="flex justify-center space-x-4">
-  //             <Link 
-  //               to={`/auth/consumer-signup?returnUrl=${encodeURIComponent(window.location.pathname)}`}
-  //               className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-  //             >
-  //               Sign Up
-  //             </Link>
-  //             <Link 
-  //               to={`/auth/consumer-login?returnUrl=${encodeURIComponent(window.location.pathname)}`}
-  //               className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors"
-  //             >
-  //               Log In
-  //             </Link>
-  //           </div>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
   if (submitted) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -233,7 +222,7 @@ const ReviewForm = () => {
           <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Review Submitted!</h2>
           <p className="text-gray-600 mb-4">
-            Thank you for your review. It will help other customers make informed decisions.
+            Thank you for your review. It has passed our moderation system and will help other customers make informed decisions.
           </p>
           <p className="text-sm text-gray-500">
             Redirecting you back to the product page...
@@ -286,11 +275,20 @@ const ReviewForm = () => {
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className={`mb-6 p-4 border rounded-lg ${rejected ? 'bg-red-50 border-red-200' : 'bg-red-50 border-red-200'}`}>
               <div className="flex items-center space-x-2">
-                <AlertCircle className="h-5 w-5 text-red-500" />
+                {rejected ? (
+                  <XCircle className="h-5 w-5 text-red-500" />
+                ) : (
+                  <AlertCircle className="h-5 w-5 text-red-500" />
+                )}
                 <p className="text-red-700">{error}</p>
               </div>
+              {rejected && (
+                <p className="text-sm text-red-600 mt-2">
+                  Please modify your review to comply with our community guidelines and try again.
+                </p>
+              )}
             </div>
           )}
 
@@ -322,7 +320,7 @@ const ReviewForm = () => {
             {/* Overall Rating */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Overall Rating
+                Overall Rating *
               </label>
               <StarRating
                 value={formData.overall_rating}
@@ -342,10 +340,10 @@ const ReviewForm = () => {
                     <div key={crit} className="flex items-center justify-between">
                       <span className="text-sm text-gray-700 mr-4">{crit}</span>
                       <StarRating
-                        value={formData.criteria_ratings[crit] || 0}
+                        value={formData.ratings[crit] || 0}
                         onChange={(val) => setFormData(prev => ({
                           ...prev,
-                          criteria_ratings: { ...prev.criteria_ratings, [crit]: val }
+                          ratings: { ...prev.ratings, [crit]: val }
                         }))}
                         name={`criteria_${crit}`}
                         size={20}
@@ -358,13 +356,13 @@ const ReviewForm = () => {
 
             {/* Review Text */}
             <div>
-              <label htmlFor="review_text" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="text" className="block text-sm font-medium text-gray-700 mb-2">
                 Overall Description *
               </label>
               <textarea
-                id="review_text"
-                name="review_text"
-                value={formData.review_text}
+                id="text"
+                name="text"
+                value={formData.text}
                 onChange={handleInputChange}
                 rows={6}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
@@ -372,7 +370,7 @@ const ReviewForm = () => {
                 required
               />
               <p className="mt-1 text-sm text-gray-500">
-                {formData.review_text.length}/1000 characters
+                {formData.text.length}/1000 characters
               </p>
             </div>
 
@@ -392,7 +390,7 @@ const ReviewForm = () => {
                 {submitting ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span>Submitting...</span>
+                    <span>Processing...</span>
                   </>
                 ) : (
                   <>
