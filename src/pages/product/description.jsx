@@ -298,14 +298,20 @@ const ProductDescription = () => {
           <p className="text-gray-700 leading-relaxed">{product.description}</p>
         </div>
 
-        {/* Specifications (Table Layout) */}
-          <div className="mt-8 bg-white rounded-lg shadow-sm border p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Specifications</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Specifications */}
+        <div className="mt-8 bg-white rounded-lg shadow-sm border p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Specifications</h3>
+          <div className="space-y-0 divide-y divide-gray-100">
             {['Weight','Ingredients','Nutritional Value','Allergens','Shelf Life','Storage','Certifications'].map((key) => (
-                <div key={key} className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-sm text-gray-600">{key}:</span>
-                <span className="text-sm font-medium text-gray-900">{product.specifications?.[key] || '-'}</span>
+              <div key={key} className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-4 first:pt-0 last:pb-0">
+                <div className="sm:col-span-1">
+                  <dt className="text-sm font-semibold text-gray-900">{key}</dt>
+                </div>
+                <div className="sm:col-span-2">
+                  <dd className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+                    {product.specifications?.[key] || '-'}
+                  </dd>
+                </div>
               </div>
             ))}
           </div>
