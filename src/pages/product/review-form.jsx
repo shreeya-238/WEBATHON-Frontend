@@ -129,10 +129,10 @@ const ReviewForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!isAuthenticated) {
-      setError('Please sign up or log in to submit a review');
-      return;
-    }
+    // if (!isAuthenticated) {
+    //   setError('Please sign up or log in to submit a review');
+    //   return;
+    // }
 
     if (!formData.review_text.trim()) {
       setError('Please enter your review');
@@ -185,46 +185,46 @@ const ReviewForm = () => {
     );
   }
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="bg-white shadow-sm border-b">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center py-4">
-              <Link to={`/product/${id}`} className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
-                <ArrowLeft className="h-5 w-5" />
-                <span>Back to Product</span>
-              </Link>
-            </div>
-          </div>
-        </div>
+  // if (!isAuthenticated) {
+  //   return (
+  //     <div className="min-h-screen bg-gray-50">
+  //       <div className="bg-white shadow-sm border-b">
+  //         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+  //           <div className="flex items-center py-4">
+  //             <Link to={`/product/${id}`} className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
+  //               <ArrowLeft className="h-5 w-5" />
+  //               <span>Back to Product</span>
+  //             </Link>
+  //           </div>
+  //         </div>
+  //       </div>
 
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
-            <AlertCircle className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Authentication Required</h2>
-            <p className="text-gray-600 mb-6">
-              You need to be signed up and logged in to submit a review.
-            </p>
-            <div className="flex justify-center space-x-4">
-              <Link 
-                to={`/auth/consumer-signup?returnUrl=${encodeURIComponent(window.location.pathname)}`}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Sign Up
-              </Link>
-              <Link 
-                to={`/auth/consumer-login?returnUrl=${encodeURIComponent(window.location.pathname)}`}
-                className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                Log In
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  //       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  //         <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
+  //           <AlertCircle className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
+  //           <h2 className="text-2xl font-bold text-gray-900 mb-4">Authentication Required</h2>
+  //           <p className="text-gray-600 mb-6">
+  //             You need to be signed up and logged in to submit a review.
+  //           </p>
+  //           <div className="flex justify-center space-x-4">
+  //             <Link 
+  //               to={`/auth/consumer-signup?returnUrl=${encodeURIComponent(window.location.pathname)}`}
+  //               className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+  //             >
+  //               Sign Up
+  //             </Link>
+  //             <Link 
+  //               to={`/auth/consumer-login?returnUrl=${encodeURIComponent(window.location.pathname)}`}
+  //               className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors"
+  //             >
+  //               Log In
+  //             </Link>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   if (submitted) {
     return (
