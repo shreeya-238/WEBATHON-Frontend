@@ -13,6 +13,7 @@ const AddProduct = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [imageFile, setImageFile] = useState(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -90,61 +91,69 @@ const AddProduct = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
+  
+  if (!formData.name || !formData.brand || !formData.category || !formData.description || !formData.price) {
+    setError('Please fill out all required fields marked with *');
+    return;
+  }
+
+  setSubmitting(true);
+  setError('');
+
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const token = localStorage.getItem('token');
+
+    const { id, ...productDataForCreation } = {
+      ...formData,
+      price: parseFloat(formData.price),
+    };
+
+    const createResponse = await fetch(`${apiUrl}/products`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(productDataForCreation), 
+    });
+
+    const newProduct = await createResponse.json();
+    if (!createResponse.ok) {
     
-    // Validation
-    if (!formData.name.trim()) {
-      setError('Product name is required');
-      return;
-    }
-    if (!formData.brand.trim()) {
-      setError('Brand is required');
-      return;
-    }
-    if (!formData.category) {
-      setError('Category is required');
-      return;
-    }
-    if (!formData.description.trim()) {
-      setError('Description is required');
-      return;
-    }
-    if (!formData.price.trim()) {
-      setError('Price is required');
-      return;
+      const errorDetails = newProduct.details ? newProduct.details.join(', ') : newProduct.message;
+      throw new Error(errorDetails || 'Failed to create product.');
     }
 
-    try {
-      setSubmitting(true);
-      setError('');
+    if (imageFile) {
 
-      // Mock API call - replace with actual API endpoint
-      const productData = {
-        ...formData,
-        price: parseFloat(formData.price),
-        created_at: new Date().toISOString(),
-        status: 'Active'
-      };
+      console.log("✅ Step B initiated: Found an image file to upload.", imageFile);
+      const imageFormData = new FormData();
+      imageFormData.append('image', imageFile);
 
-      console.log('Submitting product:', productData);
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      setSubmitted(true);
-      
-      // Redirect back to dashboard after 2 seconds
-      setTimeout(() => {
-        navigate('/company/dashboard');
-      }, 2000);
+      console.log("🚀 Sending image upload request to:", `${apiUrl}/products/${newProduct._id}/upload-image`);
 
-    } catch (error) {
-      console.error('Error adding product:', error);
-      setError('Failed to add product. Please try again.');
-    } finally {
-      setSubmitting(false);
+      const uploadResponse = await fetch(`${apiUrl}/products/${newProduct._id}/upload-image`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: imageFormData,
+      });
+
+      if (!uploadResponse.ok) {
+        console.warn('Product created, but image upload failed.');
+      }
     }
-  };
+
+    setSubmitted(true);
+    setTimeout(() => navigate('/company/dashboard'), 2000);
+
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   if (submitted) {
     return (
@@ -376,6 +385,20 @@ const AddProduct = () => {
                 />
               </div>
             </div>
+
+            <div>
+                <label htmlFor="imageFile" className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Image
+                </label>
+                <input
+                  type="file"
+                  id="imageFile"
+                  name="imageFile"
+                  accept="image/png, image/jpeg"
+                  onChange={(e) => setImageFile(e.target.files[0])} 
+                  className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
+              </div>
 
             {/* Dynamic Specifications based on Category */}
             {formData.category && categorySpecifications[formData.category] && (

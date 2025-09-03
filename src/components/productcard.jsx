@@ -35,12 +35,16 @@ const ProductCard = ({ product }) => {
     return 'Fair';
   };
 
+  const displayImage = image_url && image_url.startsWith('http')
+    ? image_url
+    : `https://picsum.photos/seed/${id}/400/300`;
+
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 border border-gray-200 overflow-hidden group h-full flex flex-col">
     
       <div className="relative aspect-square overflow-hidden">
         <img
-          src={`https://picsum.photos/seed/${id}/400/300`}
+          src={displayImage}
           alt={name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
