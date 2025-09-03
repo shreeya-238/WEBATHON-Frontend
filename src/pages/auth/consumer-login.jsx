@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -45,31 +46,30 @@ const ConsumerLogin = () => {
       setErrors({});
 
       try {
-        // In a real app, you would make an API call here
-        // For demo purposes, we'll simulate a successful login
-        const userData = {
-          name: formData.email.split('@')[0],
-          email: formData.email,
-          token: 'sample-consumer-token-123',
-          role: 'consumer',
-          type: 'consumer'
-        };
-        
-        // Use the global handleLogin function if it exists
-        if (window.handleLogin) {
-          window.handleLogin(userData);
-        } else {
-          // Fallback if handleLogin is not available
-          localStorage.setItem('user', JSON.stringify(userData));
-          localStorage.setItem('token', userData.token);
-          window.dispatchEvent(new Event('authChange'));
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const response = await fetch(`${apiUrl}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+          }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message || 'Login failed.');
         }
 
-        // Redirect based on intended URL or default
-        const redirectTo = searchParams.get('redirect') || '/';
-        navigate(redirectTo);
-      } catch (error) {
-        setErrors({ submit: error.message || 'Login failed. Please try again.' });
+        // SUCCESS
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        const returnUrl = searchParams.get('returnUrl');
+        navigate(returnUrl || '/products');
+
+      } catch (err) {
+        setErrors({ api: err.message }); // Display API errors
       } finally {
         setIsLoading(false);
       }

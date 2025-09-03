@@ -1,4 +1,7 @@
 
+// 
+
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
@@ -243,10 +246,7 @@ const ProductDescription = () => {
             </div>
 
             {/* Actions */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
-              <button onClick={() => setShowReviewModal(true)} className="bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors">Leave a Review</button>
-              <button onClick={() => setShowComplaintModal(true)} className="bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition-colors">File a Complaint</button>
-            </div>
+            
           </div>
         </div>
       </div>
