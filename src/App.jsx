@@ -2,7 +2,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/home';
 import Products from './pages/products.jsx';
 import Analytics from './pages/analytics.jsx';
+import Stories from './pages/stories';
 import Category from './pages/category';
+import ScrollToTop from './components/ScrollToTop';
 
 // Auth Pages
 import ConsumerSignup from './pages/auth/consumer-signup';
@@ -15,13 +17,14 @@ import AdminLogin from './pages/auth/admin-login';
 // Dashboard Pages
 import CustomerDashboard from './pages/customer/dashboard';
 import CompanyDashboard from './pages/company/dashboard';
+import CompanyAnalytics from './pages/company/analytics';
 import AddProduct from './pages/company/add-product';
 
 // Product Pages
 import ProductDescription from './pages/product/description';
 import ReviewForm from './pages/product/review-form';
 import ComplaintForm from './pages/product/complaint-form';
-import SearchResults from './pages/search-results';
+import SearchResults from './pages/search';
 
 // Components
 import Sidebar from './components/sidebar';
@@ -31,13 +34,16 @@ function App() {
   return (
     <Router>
       <div className="relative">
-        <Navbar />
-        <Routes>
+        <ScrollToTop>
+          <Navbar />
+          <Routes>
           {/* Main Pages */}
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/stories" element={<Stories />} />
           <Route path="/category/:slug" element={<Category />} />
+          <Route path="/search" element={<SearchResults />} />
           
           {/* Consumer Authentication */}
           <Route path="/auth/consumer-signup" element={<ConsumerSignup />} />
@@ -54,6 +60,7 @@ function App() {
           {/* Dashboard Routes */}
           <Route path="/customer/dashboard" element={<CustomerDashboard />} />
           <Route path="/company/dashboard" element={<CompanyDashboard />} />
+          <Route path="/company/analytics" element={<CompanyAnalytics />} />
           <Route path="/company/add-product" element={<AddProduct />} />
           
           {/* Product Routes */}
@@ -61,8 +68,8 @@ function App() {
           <Route path="/products/:id/review" element={<ReviewForm />} />
           <Route path="/products/:id/complaint" element={<ComplaintForm />} />
           <Route path="/search" element={<SearchResults />} />
-        </Routes>
-
+          </Routes>
+        </ScrollToTop>
       </div>
     </Router>
   );

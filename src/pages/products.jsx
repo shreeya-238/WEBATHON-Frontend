@@ -110,9 +110,9 @@ const Products = () => {
       <footer className="bg-gray-900 text-gray-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
-            <h4 className="text-white text-lg font-semibold mb-4">TrustConsumer</h4>
+            <h4 className="text-white text-lg font-semibold mb-4">Trustify</h4>
             <ul className="space-y-2 text-sm">
-              <li><a className="hover:text-white" href="#">TrustConsumer</a></li>
+              <li><a className="hover:text-white" href="#">Trustify</a></li>
               <li><a className="hover:text-white" href="#">Resources</a></li>
               <li><a className="hover:text-white" href="#">Legal</a></li>
               <li><a className="hover:text-white" href="#">Contact</a></li>
@@ -131,7 +131,7 @@ const Products = () => {
         <div className="border-t border-gray-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 text-sm flex flex-col sm:flex-row items-center justify-between">
             <span>Made with ❤️ by Your Brand</span>
-            <span className="mt-2 sm:mt-0">© {new Date().getFullYear()} TrustConsumer</span>
+            <span className="mt-2 sm:mt-0">© {new Date().getFullYear()} Trustify</span>
           </div>
         </div>
       </footer>

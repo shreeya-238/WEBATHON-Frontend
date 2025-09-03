@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, MessageCircle, Star, AlertTriangle, Building, Mail, Phone, Package, Users, TrendingUp, Home } from 'lucide-react';
+import { Calendar, MessageCircle, Star, AlertTriangle, Building, Mail, Phone, Package, Users, TrendingUp, Home, BarChart2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const CompanyDashboard = () => {
@@ -253,7 +253,7 @@ const CompanyDashboard = () => {
             title: "Website Not Loading Properly",
             content: "The website takes too long to load and some features are not working as expected. Need immediate attention.",
             date: "2024-08-20",
-            status: "Pending",
+            status: "In Progress",
             priority: "High"
           },
           {
@@ -273,7 +273,7 @@ const CompanyDashboard = () => {
             title: "Downtime Issues",
             content: "Experienced unexpected downtime yesterday. This caused significant loss in business.",
             date: "2024-08-15",
-            status: "Solved",
+            status: "Resolved",
             priority: "Medium"
           },
           {
@@ -283,7 +283,7 @@ const CompanyDashboard = () => {
             title: "Poor Campaign Performance",
             content: "The marketing campaign is not generating the expected results. Need to review the strategy.",
             date: "2024-08-12",
-            status: "Pending",
+            status: "In Progress",
             priority: "Medium"
           },
           {
@@ -293,7 +293,7 @@ const CompanyDashboard = () => {
             title: "Delayed Response",
             content: "Consultant was late for scheduled meeting and didn't provide the promised documentation.",
             date: "2024-08-10",
-            status: "Solved",
+            status: "Resolved",
             priority: "Low"
           }
         ]);
@@ -358,6 +358,20 @@ const CompanyDashboard = () => {
     setIsChatOpen(false);
     setSelectedComplaint(null);
     setChatMessages([]);
+  };
+
+  const handleStatusChange = (complaintId, newStatus) => {
+    setComplaints(prevComplaints => 
+      prevComplaints.map(complaint => 
+        complaint._id === complaintId 
+          ? { ...complaint, status: newStatus } 
+          : complaint
+      )
+    );
+    
+    // In a real app, you would also update the status on the server here
+    // Example:
+    // await updateComplaintStatus(complaintId, newStatus);
   };
 
   // Send message function for chat
@@ -543,6 +557,13 @@ const CompanyDashboard = () => {
               >
                 Complaints ({complaints.length})
               </button>
+              <Link
+                to="/company/analytics"
+                className="flex items-center py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              >
+                <BarChart2 className="h-4 w-4 mr-2" />
+                Analytics
+              </Link>
             </nav>
           </div>
 
@@ -633,16 +654,21 @@ const CompanyDashboard = () => {
                         <p className="text-sm text-gray-500">{complaint.product}</p>
                       </div>
                       <div className="flex items-center space-x-2">
-                                                 <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                           complaint.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                           complaint.status === 'completed' ? 'bg-green-100 text-green-800' :
-                           complaint.status === 'investigation' ? 'bg-blue-100 text-blue-800' :
-                           'bg-yellow-100 text-yellow-800'
-                         }`}>
-                           {complaint.status === 'pending' ? 'Pending' :
-                            complaint.status === 'completed' ? 'Completed' :
-                            complaint.status === 'investigation' ? 'Investigation' : complaint.status}
-                         </span>
+                        <select
+                          value={complaint.status}
+                          onChange={(e) => handleStatusChange(complaint._id, e.target.value)}
+                          className={`text-xs font-medium rounded-md px-2 py-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 ${
+                            complaint.status === 'Pending' 
+                              ? 'bg-yellow-100 text-yellow-800 border-yellow-200 focus:ring-yellow-500' 
+                              : complaint.status === 'In Progress' 
+                                ? 'bg-blue-100 text-blue-800 border-blue-200 focus:ring-blue-500' 
+                                : 'bg-green-100 text-green-800 border-green-200 focus:ring-green-500'
+                          } border`}
+                        >
+                          <option value="Pending" className="bg-white text-gray-900">Pending</option>
+                          <option value="In Progress" className="bg-white text-gray-900">In Progress</option>
+                          <option value="Resolved" className="bg-white text-gray-900">Resolved</option>
+                        </select>
                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                           complaint.priority === 'High' ? 'bg-red-100 text-red-800' :
                           complaint.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :

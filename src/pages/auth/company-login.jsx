@@ -36,16 +36,59 @@ const CompanyLogin = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleDemoLogin = () => {
+    // Set demo user data in localStorage
+    const demoUser = {
+      name: 'Demo Company',
+      email: 'demo@company.com',
+      token: 'demo-token-123',
+      role: 'company',
+      type: 'company'
+    };
+    
+    // Use the global handleLogin function if it exists
+    if (window.handleLogin) {
+      window.handleLogin(demoUser);
+    } else {
+      // Fallback if handleLogin is not available
+      localStorage.setItem('user', JSON.stringify(demoUser));
+      localStorage.setItem('token', demoUser.token);
+      window.dispatchEvent(new Event('authChange'));
+    }
+    
+    // Redirect to company dashboard
+    navigate('/company/dashboard');
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validateForm()) {
       setIsLoading(true);
       // Simulate API call for login
       setTimeout(() => {
-        setIsLoading(false);
-        // Redirect to company dashboard
+        // In a real app, you would make an API call here
+        const userData = {
+          name: formData.email.split('@')[0],
+          email: formData.email,
+          token: 'sample-token-123',
+          role: 'company',
+          type: 'company'
+        };
+        
+        // Use the global handleLogin function if it exists
+        if (window.handleLogin) {
+          window.handleLogin(userData);
+        } else {
+          // Fallback if handleLogin is not available
+          localStorage.setItem('user', JSON.stringify(userData));
+          localStorage.setItem('token', userData.token);
+          window.dispatchEvent(new Event('authChange'));
+        }
+        
+        // Redirect to dashboard
         navigate('/company/dashboard');
-      }, 2000);
+        setIsLoading(false);
+      }, 1000);
     }
   };
 
@@ -139,6 +182,23 @@ const CompanyLogin = () => {
               {isLoading ? 'Signing in...' : 'Sign in to Company Dashboard'}
             </button>
           </div>
+
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">Or try a demo</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleDemoLogin}
+            className="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Demo Company Login
+          </button>
 
           <div className="text-center">
             <p className="text-sm text-gray-600">
