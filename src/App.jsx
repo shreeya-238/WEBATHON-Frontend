@@ -46,7 +46,7 @@ function App() {
           {/* Company Authentication */}
           <Route path="/auth/company-signup" element={<CompanySignup />} />
           <Route path="/auth/company-login" element={<CompanyLogin />} />
-          
+         
           {/* Admin Authentication */}
           <Route path="/auth/admin-signup" element={<AdminSignup />} />
           <Route path="/auth/admin-login" element={<AdminLogin />} />
@@ -57,11 +57,12 @@ function App() {
           <Route path="/company/add-product" element={<AddProduct />} />
           
           {/* Product Routes */}
-          <Route path="/product/:id" element={<ProductDescription />} />
-          <Route path="/product/:id/review" element={<ReviewForm />} />
-          <Route path="/product/:id/complaint" element={<ComplaintForm />} />
+          <Route path="/products/:id" element={<ProductDescription />} />
+          <Route path="/products/:id/review" element={<ReviewForm />} />
+          <Route path="/products/:id/complaint" element={<ComplaintForm />} />
           <Route path="/search" element={<SearchResults />} />
         </Routes>
+
       </div>
     </Router>
   );
