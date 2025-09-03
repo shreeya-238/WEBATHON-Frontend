@@ -23,36 +23,23 @@ const Home = () => {
             <p className="text-gray-600 text-lg mb-8">
               TrustConsumer provides detailed product information, user-generated reviews, and AI-driven insights to help you make informed decisions.
             </p>
-            <div className="bg-white rounded-xl shadow-md border p-6 max-w-md">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Login / Sign Up</h2>
-              <form onSubmit={handleGetOtp} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone or Email</label>
-                  <input
-                    type="text"
-                    value={contact}
-                    onChange={(e) => setContact(e.target.value)}
-                    placeholder="Enter phone or email"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-60"
-                >
-                  Sign Up
-                </button>
-              </form>
-              <div className="mt-4 text-sm text-gray-600 flex items-center justify-between">
-                {/* --- CHANGE #4: Use href instead of to --- */}
-                <Link to="/auth/consumer-login" className="hover:text-green-600">Already have an account?</Link>
-                <Link to="/auth/company-signup" className="hover:text-green-600">For Businesses</Link>
-              </div>
-              <div className="mt-3 text-center">
-                <Link href="/products" className="text-gray-500 hover:text-gray-700 underline">
-                  Skip for now
+            <div className="bg-white rounded-xl shadow-md border p-6 max-w-md space-y-4">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 text-center">Welcome to TrustConsumer</h2>
+              <Link
+                to="/auth/consumer-signup"
+                className="block w-full bg-green-600 text-white text-center py-3 rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Sign Up
+              </Link>
+              <Link
+                to="/auth/consumer-login"
+                className="block w-full bg-white text-green-600 border border-green-600 text-center py-3 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Login
+              </Link>
+              <div className="pt-4 text-center">
+                <Link to="/auth/company-signup" className="text-sm text-gray-600 hover:text-green-600">
+                  For Businesses
                 </Link>
               </div>
             </div>

@@ -257,25 +257,6 @@ const ProductDescription = () => {
         <p className="text-gray-700 leading-relaxed">{product.description}</p>
       </div>
 
-      {/* Specifications */}
-      <div className="mt-8 bg-white rounded-lg shadow-sm border p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">Specifications</h3>
-        <div className="space-y-0 divide-y divide-gray-100">
-          {['Weight', 'Ingredients', 'Nutritional Value', 'Allergens', 'Shelf Life', 'Storage', 'Certifications'].map((key) => (
-            <div key={key} className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-4 first:pt-0 last:pb-0">
-              <div className="sm:col-span-1">
-                <dt className="text-sm font-semibold text-gray-900">{key}</dt>
-              </div>
-              <div className="sm:col-span-2">
-                <dd className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
-                  {product.specifications?.[key] || '-'}
-                </dd>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Reviews & Complaints Tabs */}
       <div className="mt-8 bg-white rounded-lg shadow-sm border">
         <div className="flex items-center border-b">

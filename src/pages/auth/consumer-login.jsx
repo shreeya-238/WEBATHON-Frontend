@@ -65,7 +65,7 @@ const ConsumerLogin = () => {
         localStorage.setItem('user', JSON.stringify(data.user));
 
         const returnUrl = searchParams.get('returnUrl');
-        navigate(returnUrl || '/customer/dashboard');
+        navigate(returnUrl || '/products');
 
       } catch (err) {
         setErrors({ api: err.message }); // Display API errors
